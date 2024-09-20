@@ -234,3 +234,13 @@ button:active {
     padding: 20px;
     border-radius: 5px;
 }
+
+.contact-table__column {
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+.element__letter {
+    background-color: #000;
+    color: white;
+}

@@ -29,8 +29,28 @@ window.onload = function () {
         }
     }
 
+
+
 // Объект для хранения контактов по первой букве фамилии
     let contactsByLetter = {};
+
+    //Функция для загрузки контактов из localStorage
+
+    function loadContacts() {
+        console.log("Функция loadContacts вызвана"); // Отладка
+        const storedContacts = localStorage.getItem('contacts');
+        console.log("Загружаемые данные из localStorage:", storedContacts); // Отладка
+
+        if (storedContacts) {
+            contactsByLetter = JSON.parse(storedContacts);
+            console.log("Парсинг данных:", contactsByLetter); // Отладка
+            displayContacts(); // Отображаем загруженные контакты
+        } else {
+            console.log("Нет сохраненных контактов."); // Отладка
+        }
+    }
+
+
 
     // Функция проверки имени и фамилии
     function isValidName(name) {
@@ -45,8 +65,8 @@ window.onload = function () {
 
 
 // Функция добавления контакта
-    function addContact(event) {
-        event.preventDefault();
+    function addContact(e) {
+        e.preventDefault();
 
         // Получение значений из полей ввода
         const nameInput = document.getElementById('name');
@@ -87,6 +107,11 @@ window.onload = function () {
 
         // Добавление контакта в соответствующий массив
         contactsByLetter[firstLetter].push(newContact);
+
+        // Сохранение обновленного списка LocalStorage
+        localStorage.setItem("contacts", JSON.stringify(contactsByLetter));
+
+        console.log("Сохраненные данные в localStorage:", localStorage.getItem('contacts')); // Отладка
 
         // Очистка полей ввода
         nameInput.value = '';
@@ -165,10 +190,25 @@ window.onload = function () {
         });
     }
 
+
+    // Функция очистки таблицы
+    function clearContacts () {
+        contactsByLetter = {}; // Оъект с контактами очистка
+
+        // Очищаем элемент таблицы на странице
+        const contactTableElement = document.getElementById('contactTable');
+        contactTableElement.innerHTML = '';
+
+        localStorage.removeItem('contacts');
+    }
+
 // Обработчик события отправки формы
     const userForm = document.getElementById('user-form');
     userForm.addEventListener('submit', addContact);
 
+// Обработчик события для кнопки "Очистить список"
+    const clearButton = document.querySelector('.js-clear-btn');
+    clearButton.addEventListener('click', clearContacts);
 
 
 
@@ -220,7 +260,6 @@ window.onload = function () {
     modals();
 
 
-
-
+// Загрузка контактов из localStorage при загрузке страницы
+    loadContacts();
 };
-

@@ -132,7 +132,7 @@ window.onload = function () {
         // Скрываем ошибку через несколько секунд
         setTimeout(() => {
             errorHolder.style.display = 'none';
-        }, 3000);
+        }, 5000);
     }
 
 // Функция отображения контактов в таблице
@@ -154,14 +154,18 @@ window.onload = function () {
 
                 const letterTextElement = document.createElement('div');
                 letterTextElement.classList.add('element__letter', 'js-column-letter');
-                letterTextElement.textContent = letter.toUpperCase(); // Отображаем букву в верхнем регистре
+                letterTextElement.textContent = `${letter.toUpperCase()} (${contactsByLetter[letter].length})`; // Отображаем букву в верхнем регистре
+
+               letterTextElement.addEventListener('click', (e) => {
+                   contactsElement.classList.toggle('hidden')
+               })
 
                 letterElement.appendChild(letterTextElement);
                 columnElement.appendChild(letterElement);
 
                 // Создание элемента для контактов
                 const contactsElement = document.createElement('div');
-                contactsElement.classList.add('column__element', 'contacts');
+                contactsElement.classList.add('column__element', 'contacts', 'hidden' );
                 contactsElement.dataset.id = `contacts-${letter}`;
 
                 // Добавление контактов в элемент
@@ -193,13 +197,17 @@ window.onload = function () {
 
     // Функция очистки таблицы
     function clearContacts () {
-        contactsByLetter = {}; // Оъект с контактами очистка
+        const confirmation = confirm(
+            'Вы уверены, что хотите удалить все контакт?'
+        );
+        if (confirmation) {
+            contactsByLetter = {};
 
-        // Очищаем элемент таблицы на странице
-        const contactTableElement = document.getElementById('contactTable');
-        contactTableElement.innerHTML = '';
+            const contactTableElement = document.getElementById('contactTable');
+            contactTableElement.innerHTML = '';
 
-        localStorage.removeItem('contacts');
+            localStorage.removeItem('contacts');
+        }
     }
 
 // Обработчик события отправки формы

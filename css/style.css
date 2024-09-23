@@ -244,3 +244,7 @@ button:active {
     background-color: #000;
     color: white;
 }
+
+.hidden {
+    display: none;
+}

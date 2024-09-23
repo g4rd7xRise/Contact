@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Contacts</title>
+    <script src="./js/script.js" defer></script>
+    <link rel="icon" href="./icons/favicon.svg" type="image/x-icon">
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+<div class="wrapper">
+    <header class="header">
+        <h1 class="header__title">Список контактов</h1>
+        <a href="https://github.com/g4rd7xRise/Contact" class="repository-link" target="_blank">GitHub Repository</a>
+    </header>
+
+<main>
+    <form class="inputs" id="user-form">
+        <div class="inputs__item">
+            <label for="name" class="visually-hidden"></label>
+            <input type="text" id="name" class="form-inputs js-name-input" placeholder="Имя"  aria-describedby="name-error" required>
+            <span class="form__error js_name-error" id="name-error" aria-live="polite"></span>
+        </div>
+
+        <div class="inputs__item">
+            <label for="surname" class="visually-hidden"></label>
+            <input type="text" id="surname" class="form-inputs js-surname-input" placeholder="Фамилия" aria-describedby="surname-error" required>
+            <span class="form__error js_surname-error" id="surname-error" aria-live="polite"></span>
+        </div>
+
+        <div class="inputs__item">
+            <label for="vacancy" class="visually-hidden"></label>
+            <input type="text" id="vacancy" class="form-inputs js-vacancy-input" placeholder="Должность">
+        </div>
+
+        <div class="inputs__item">
+            <label for="phone" class="visually-hidden"></label>
+            <input type="tel" id="phone" class="form-inputs js-phone-input" placeholder="Телефон 123-456-7890"  required>
+        </div>
+
+        <div class="inputs__item">
+            <button type="submit" class="input-btn js-submit-btn">Добавить</button>
+            <button type="button" class="input-btn js-clear-btn">Очистить список</button>
+            <button type="button" class="input-btn js-search-btn">Поиск</button>
+        </div>
+    </form>
+
+    <div class="error-holder">
+        <div class="error js-error"></div>
+    </div>
+
+
+    <div class="contact-table" id="contactTable">
+        <!-- Элементы будут добавляться динамически -->
+    </div>
+</main>
+
+    <footer>
+        <!-- Попап для поиска контактов -->
+        <div class="modal-overlay modalOverlay" id="searchPopupOverlay"></div>
+        <div class="search-popup popup" id="searchPopup">
+            <h2>Поиск контакта</h2>
+            <input type="text" placeholder="Поиск..." class="search-popup__input js-search-input">
+            <button class="search-popup__show-all js-show-all-btn">Показать все</button>
+            <div class="search-popup__output js-popup-output"></div>
+            <button class="fa fa-window-close search-popup__close js-popup-close">×</button>
+        </div>
+
+        <!-- Попап для редактирования контактов -->
+        <div class="modal-overlay modalOverlay" id="editPopupOverlay"></div>
+        <div class="edit-popup popup" id="editPopup">
+            <h2>Редактировать контакт</h2>
+            <input type="text" class="edit-popup__inputs__name js-edit-name-input" placeholder="Имя">
+            <input type="text" class="edit-popup__inputs__vacancy js-edit-vacancy-input" placeholder="Должность">
+            <input type="text" class="edit-popup__inputs__phone js-edit-phone-input" placeholder="Телефон">
+            <button class="edit-popup__submit js-submit-edit-btn">Редактировать</button>
+            <button class="fa fa-window-close edit-popup__close js-edit-popup-close">×</button>
+        </div>
+    </footer>
+</div>
+
+</body>
+</html>

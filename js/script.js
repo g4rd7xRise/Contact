@@ -286,7 +286,7 @@ window.onload = function () {
                 <strong>Имя:</strong> ${contact.name} <br>
                 <strong>Должность:</strong> ${contact.vacancy} <br>
                 <strong>Телефон:</strong> ${contact.phone}
-                <button class="edit-btn" data-firstname="${contact.FirstName}" data-name="${contact.Name}" data-vacancy="${contact.Vacancy}" data-phone="${contact.Number}">Редактировать</button>
+                <button class="edit-btn" data-surname="${contact.surname}" data-name="${contact.name}" data-vacancy="${contact.vacancy}" data-phone="${contact.number}">Редактировать</button>
                 <hr>
             `;
 
@@ -298,7 +298,7 @@ window.onload = function () {
         const editButtons = output.querySelectorAll('.edit-btn');
         editButtons.forEach(button => {
             button.addEventListener('click', (event) => {
-                const firstName = event.target.dataset.firstname;
+                const firstName = event.target.dataset.surname;
                 const name = event.target.dataset.name;
                 const vacancy = event.target.dataset.vacancy;
                 const phone = event.target.dataset.phone;
@@ -353,7 +353,7 @@ window.onload = function () {
         // Находим контакт по фамилии и обновляем его данные
         for (let letter in contactsByLetter) {
             contactsByLetter[letter] = contactsByLetter[letter].map(contact => {
-                if (contact.FirstName === firstNameToEdit) {
+                if (contact.surname === firstNameToEdit) {
                     return new Contact(firstNameToEdit, nameInputValue, vacancyInputValue, phoneInputValue);
                 }
                 return contact;

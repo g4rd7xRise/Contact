@@ -6,6 +6,7 @@ window.onload = function () {
       this.surname = surname;
       this.vacancy = vacancy;
       this.phone = phone;
+      this.Id = new Date().getTime();
     }
   }
 
@@ -141,7 +142,7 @@ window.onload = function () {
           contactsByLetter[letter].length
         })`; // Отображаем букву в верхнем регистре
 
-        letterTextElement.addEventListener("click", (e) => {
+        letterTextElement.addEventListener("click", () => {
           contactsElement.classList.toggle("hidden");
         });
 
@@ -265,18 +266,18 @@ window.onload = function () {
 
   // Функция для отображения всех контактов в модальном окне
   function showAllContacts(output) {
-    Object.keys(contactsByLetter).forEach((letter) => {
-      contactsByLetter[letter].forEach((contact) => {
-        const contactItemElement = document.createElement("div");
-        contactItemElement.classList.add("contact-item");
+    Object.keys(contactsByLetter).forEach(letter => {
+      contactsByLetter[letter].forEach(contact => {
+        const contactItemElement = document.createElement('div');
+        contactItemElement.classList.add('contact-item');
 
         contactItemElement.innerHTML = `
                 <strong>Фамилия:</strong> ${contact.surname} <br>
                 <strong>Имя:</strong> ${contact.name} <br>
                 <strong>Должность:</strong> ${contact.vacancy} <br>
                 <strong>Телефон:</strong> ${contact.phone}
-                <button class="edit-btn" data-surname="${contact.surname}" data-name="${contact.name}" data-vacancy="${contact.vacancy}" data-phone="${contact.number}">Редактировать</button>
-                <hr>
+                <button class="edit-btn" data-id="${contact.Id}">Редактировать</button>
+        <hr>
             `;
 
         output.appendChild(contactItemElement);
@@ -284,38 +285,46 @@ window.onload = function () {
     });
 
     // Добавляем обработчики событий на кнопки редактирования
-    const editButtons = output.querySelectorAll(".edit-btn");
-    editButtons.forEach((button) => {
-      button.addEventListener("click", (event) => {
-        const firstName = event.target.dataset.surname;
-        const name = event.target.dataset.name;
-        const vacancy = event.target.dataset.vacancy;
-        const phone = event.target.dataset.phone;
+    const editButtons = output.querySelectorAll('.edit-btn');
+    editButtons.forEach(button => {
+      button.addEventListener('click', (event) => {
+        const contactId = event.target.dataset.id;
+
+        // Находим контакт по уникальному идентификатору
+        const contactToEdit = findContactById(contactId);
 
         // Заполняем поля редактирования
-        const editNameInput = document.querySelector(".js-edit-name-input");
-        const editVacancyInput = document.querySelector(
-          ".js-edit-vacancy-input"
-        );
-        const editPhoneInput = document.querySelector(".js-edit-phone-input");
-
-        editNameInput.value = name;
-        editVacancyInput.value = vacancy;
-        editPhoneInput.value = phone;
+        document.querySelector('.js-edit-name-input').value = contactToEdit.name;
+        document.querySelector('.js-edit-surname-input').value = contactToEdit.surname;
+        document.querySelector('.js-edit-vacancy-input').value = contactToEdit.vacancy;
+        document.querySelector('.js-edit-phone-input').value = contactToEdit.phone;
 
         // Открываем модальное окно редактирования
-        openEditPopup(firstName);
+        openEditPopup(contactToEdit.Id);
       });
     });
   }
 
+// Функция для поиска контакта по уникальному идентификатору
+  function findContactById(id) {
+    for (let letter in contactsByLetter) {
+      for (let contact of contactsByLetter[letter]) {
+        if (contact.Id === parseInt(id)) {
+          return contact;
+        }
+      }
+    }
+    return null;
+  }
+
+
   // Функция открытия модального окна редактирования
-  function openEditPopup(firstName) {
+  function openEditPopup(id) {
     const editPopup = document.getElementById("editPopup");
     const overlay = document.getElementById("editPopupOverlay");
 
     // Сохраняем информацию о том, какой контакт редактируется
-    editPopup.dataset.surname = firstName;
+    editPopup.dataset.id = id;
 
     editPopup.style.display = "block";
     overlay.style.display = "block";
@@ -330,31 +339,29 @@ window.onload = function () {
     overlay.style.display = "none";
   }
 
+  // Обработчик события для закрытия модального окна без изменений
+  const closeEditButton = document.querySelector(".js-edit-popup-close");
+  closeEditButton.addEventListener("click", () => {
+    closeEditPopup();
+  });
+
   // Обработчик события для редактирования контакта
-  const submitEditButton = document.querySelector(".js-submit-edit-btn");
-  submitEditButton.addEventListener("click", function () {
-    const editPopup = document.getElementById("editPopup");
+  const submitEditButton = document.querySelector('.js-submit-edit-btn');
+  submitEditButton.addEventListener('click', function () {
+    const editPopup = document.getElementById('editPopup');
+    const contactId = editPopup.dataset.id;
 
     // Получаем данные из полей ввода редактирования
-    const firstNameToEdit = editPopup.dataset.surname;
-    const nameInputValue = document.querySelector(".js-edit-name-input").value;
-    const vacancyInputValue = document.querySelector(
-      ".js-edit-vacancy-input"
-    ).value;
-    const phoneInputValue = document.querySelector(
-      ".js-edit-phone-input"
-    ).value;
+    const nameInputValue = document.querySelector('.js-edit-name-input').value;
+    const surnameInputValue = document.querySelector('.js-edit-surname-input').value;
+    const vacancyInputValue = document.querySelector('.js-edit-vacancy-input').value;
+    const phoneInputValue = document.querySelector('.js-edit-phone-input').value;
 
-    // Находим контакт по фамилии и обновляем его данные
+    // Находим контакт по уникальному идентификатору и обновляем его данные
     for (let letter in contactsByLetter) {
-      contactsByLetter[letter] = contactsByLetter[letter].map((contact) => {
-        if (contact.surname === firstNameToEdit) {
-          return new Contact(
-            firstNameToEdit,
-            nameInputValue,
-            vacancyInputValue,
-            phoneInputValue
-          );
+      contactsByLetter[letter] = contactsByLetter[letter].map(contact => {
+        if (contact.Id === parseInt(contactId)) {
+          return new Contact(nameInputValue, surnameInputValue, vacancyInputValue, phoneInputValue);
         }
         return contact;
       });
@@ -365,6 +372,13 @@ window.onload = function () {
 
     // Закрываем окно редактирования и обновляем список в поисковом окне
     closeEditPopup();
+    displayContacts()
+
+    // Обновляем отображение контактов без перезагрузки страницы
+    const output = document.querySelector(".js-popup-output"); // Получаем элемент вывода
+    output.innerHTML = ""; // Очищаем текущий вывод
+    showAllContacts(output); // Отображаем обновленные контакты
+
   });
 
   // Загрузка контактов из localStorage при загрузке страницы

@@ -203,7 +203,10 @@ window.onload = function () {
   const clearButton = document.querySelector(".js-clear-btn");
   clearButton.addEventListener("click", clearContacts);
 
-  // модальные окна
+
+
+
+  // Модальные окна
   const modals = () => {
     function closeModal(modal) {
       modal.style.display = "none";
@@ -214,29 +217,20 @@ window.onload = function () {
 
     function bindModal(trigger, modal, close) {
       trigger.addEventListener("click", (e) => {
-        if (e.target) {
-          e.preventDefault();
-        }
-
+        e.preventDefault();
         modal.style.display = "block";
         modalOverlay.style.display = "block";
         document.body.style.overflow = "hidden";
         modal.setAttribute("aria-hidden", "false");
-
-        // Очищаем содержимое модального окна перед открытием
-        const output = modal.querySelector(".js-popup-output");
-        output.innerHTML = "";
-
-        // Отображаем все контакты в модальном окне
-        showAllContacts(output);
       });
 
       close.addEventListener("click", () => {
         closeModal(modal);
       });
 
-      modalOverlay.addEventListener("click", (e) => {
-        if (e.target === modalOverlay) {
+      const overlay = modal.previousElementSibling; // Получаем оверлей перед модальным окном
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) {
           closeModal(modal);
         }
       });
@@ -247,25 +241,32 @@ window.onload = function () {
     const closeBtn = document.querySelector(".js-popup-close");
     const modalOverlay = document.querySelector(".modalOverlay");
 
-    if (
-      callModalBtn &&
-      modalWindow &&
-      closeBtn &&
-      modalWindow &&
-      modalOverlay
-    ) {
+    if (callModalBtn && modalWindow && closeBtn && modalOverlay) {
       bindModal(callModalBtn, modalWindow, closeBtn);
+
+      // Добавляем обработчик для поля ввода
+      const searchInput = document.querySelector('.js-search-input');
+      searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        filterContacts(searchTerm);
+      });
+
+      // Добавляем обработчик для кнопки "Показать все"
+      const showAllBtn = document.querySelector('.js-show-all-btn');
+      if (showAllBtn) {
+        showAllBtn.addEventListener('click', function () {
+          showAllContacts(document.querySelector('.js-popup-output'));
+        });
+      }
     } else {
-      console.error(
-        "Не удалось найти необходимые элементы для модального окна."
-      );
+      console.error("Не удалось найти необходимые элементы для модального окна.");
     }
   };
 
-  modals();
-
-  // Функция для отображения всех контактов в модальном окне
+// Функция для отображения всех контактов в модальном окне
   function showAllContacts(output) {
+    output.innerHTML = ''; // Очищаем текущее содержимое
+
     Object.keys(contactsByLetter).forEach(letter => {
       contactsByLetter[letter].forEach(contact => {
         const contactItemElement = document.createElement('div');
@@ -277,7 +278,7 @@ window.onload = function () {
                 <strong>Должность:</strong> ${contact.vacancy} <br>
                 <strong>Телефон:</strong> ${contact.phone}
                 <button class="edit-btn" data-id="${contact.Id}">Редактировать</button>
-        <hr>
+                <hr>
             `;
 
         output.appendChild(contactItemElement);
@@ -285,6 +286,11 @@ window.onload = function () {
     });
 
     // Добавляем обработчики событий на кнопки редактирования
+    addEditButtonHandlers(output);
+  }
+
+// Функция для добавления обработчиков событий на кнопки редактирования
+  function addEditButtonHandlers(output) {
     const editButtons = output.querySelectorAll('.edit-btn');
     editButtons.forEach(button => {
       button.addEventListener('click', (event) => {
@@ -304,6 +310,43 @@ window.onload = function () {
       });
     });
   }
+
+// Функция для фильтрации контактов
+  function filterContacts(searchTerm) {
+    const output = document.querySelector('.js-popup-output');
+    output.innerHTML = ''; // Очищаем текущее содержимое
+
+    if (searchTerm.trim() === '') {
+      return; // Если поисковый запрос пуст, ничего не выводим
+    }
+
+    Object.keys(contactsByLetter).forEach(letter => {
+      contactsByLetter[letter].forEach(contact => {
+        if (contact.name.toLowerCase().includes(searchTerm) ||
+            contact.surname.toLowerCase().includes(searchTerm) ||
+            contact.vacancy.toLowerCase().includes(searchTerm)) {
+
+          const contactItemElement = document.createElement('div');
+          contactItemElement.classList.add('contact-item');
+          contactItemElement.innerHTML = `
+                  <strong>Фамилия:</strong> ${contact.surname} <br>
+                  <strong>Имя:</strong> ${contact.name} <br>
+                  <strong>Должность:</strong> ${contact.vacancy} <br>
+                  <strong>Телефон:</strong> ${contact.phone}
+                  <button class="edit-btn" data-id="${contact.Id}">Редактировать</button>
+                  <hr>
+              `;
+          output.appendChild(contactItemElement);
+        }
+      });
+    });
+
+    // Добавляем обработчики событий на кнопки редактирования после фильтрации
+    addEditButtonHandlers(output);
+  }
+
+// Вызов функции модальных окон
+  modals();
 
 // Функция для поиска контакта по уникальному идентификатору
   function findContactById(id) {

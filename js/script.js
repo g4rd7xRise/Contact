@@ -267,8 +267,11 @@ window.onload = function () {
   function showAllContacts(output) {
     output.innerHTML = ''; // Очищаем текущее содержимое
 
+    let hasContacts = false; // Флаг для проверки наличия контактов
+
     Object.keys(contactsByLetter).forEach(letter => {
       contactsByLetter[letter].forEach(contact => {
+        hasContacts = true;
         const contactItemElement = document.createElement('div');
         contactItemElement.classList.add('contact-item');
 
@@ -284,6 +287,9 @@ window.onload = function () {
         output.appendChild(contactItemElement);
       });
     });
+
+    // Управляем видимостью контейнера
+    output.style.display = hasContacts ? 'block' : 'none';
 
     // Добавляем обработчики событий на кнопки редактирования
     addEditButtonHandlers(output);
@@ -317,14 +323,20 @@ window.onload = function () {
     output.innerHTML = ''; // Очищаем текущее содержимое
 
     if (searchTerm.trim() === '') {
+      output.style.display = 'none'; // Скрываем при пустом запросе
       return; // Если поисковый запрос пуст, ничего не выводим
     }
+
+    let hasContacts = false; // Флаг для проверки наличия контактов
 
     Object.keys(contactsByLetter).forEach(letter => {
       contactsByLetter[letter].forEach(contact => {
         if (contact.name.toLowerCase().includes(searchTerm) ||
             contact.surname.toLowerCase().includes(searchTerm) ||
             contact.vacancy.toLowerCase().includes(searchTerm)) {
+
+          hasContacts = true; // Устанавливаем флаг, если есть хотя бы один контакт
+
 
           const contactItemElement = document.createElement('div');
           contactItemElement.classList.add('contact-item');
@@ -340,6 +352,9 @@ window.onload = function () {
         }
       });
     });
+
+    // Управляем видимостью контейнера
+    output.style.display = hasContacts ? 'block' : 'none';
 
     // Добавляем обработчики событий на кнопки редактирования после фильтрации
     addEditButtonHandlers(output);

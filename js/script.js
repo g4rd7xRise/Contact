@@ -6,12 +6,21 @@ window.onload = function () {
       this.surname = surname;
       this.vacancy = vacancy;
       this.phone = phone;
-      this.Id = new Date().getTime();
+      this.Id = `${surname[0].toLowerCase()}-${new Date().getTime()}`;
     }
   }
 
   // Объект для хранения контактов по первой букве фамилии
   let contactsByLetter = {};
+
+  // Функция для нахождения контакта по ID
+  function findContactById(contactId) {
+    for (const letter in contactsByLetter) {
+      const contact = contactsByLetter[letter].find(c => c.Id === contactId);
+      if (contact) return contact;
+    }
+    return null; // Возвращаем null, если контакт не найден
+  }
 
   //Функция для загрузки контактов из localStorage
 
@@ -188,10 +197,13 @@ window.onload = function () {
     if (confirmation) {
       contactsByLetter = {};
 
-      const contactTableElement = document.getElementById("contactTable");
-      contactTableElement.innerHTML = "";
-
       localStorage.removeItem("contacts");
+
+      displayContacts();
+      const output = document.querySelector(".js-popup-output");
+      output.innerHTML = ""; // Очищаем текущий вывод в модальном окне
+      output.style.display = 'none'; // Скрываем контейнер вывода,
+
     }
   }
 
@@ -202,8 +214,6 @@ window.onload = function () {
   // Обработчик события для кнопки "Очистить список"
   const clearButton = document.querySelector(".js-clear-btn");
   clearButton.addEventListener("click", clearContacts);
-
-
 
 
   // Модальные окна
@@ -363,18 +373,6 @@ window.onload = function () {
 // Вызов функции модальных окон
   modals();
 
-// Функция для поиска контакта по уникальному идентификатору
-  function findContactById(id) {
-    for (let letter in contactsByLetter) {
-      for (let contact of contactsByLetter[letter]) {
-        if (contact.Id === parseInt(id)) {
-          return contact;
-        }
-      }
-    }
-    return null;
-  }
-
 
   // Функция открытия модального окна редактирования
   function openEditPopup(id) {
@@ -415,15 +413,38 @@ window.onload = function () {
     const vacancyInputValue = document.querySelector('.js-edit-vacancy-input').value;
     const phoneInputValue = document.querySelector('.js-edit-phone-input').value;
 
-    // Находим контакт по уникальному идентификатору и обновляем его данные
-    for (let letter in contactsByLetter) {
-      contactsByLetter[letter] = contactsByLetter[letter].map(contact => {
-        if (contact.Id === parseInt(contactId)) {
-          return new Contact(nameInputValue, surnameInputValue, vacancyInputValue, phoneInputValue);
-        }
-        return contact;
-      });
+    let contactToEdit = findContactById(contactId);
+
+    // Удаляем контакт из старого раздела
+    const oldLetter = contactToEdit.Id[0]; // Используем первую букву ID для определения старого раздела
+    contactsByLetter[oldLetter] = contactsByLetter[oldLetter].filter(contact => contact.Id !== contactId);
+
+
+
+    // Обновляем данные контакта
+    contactToEdit.name = nameInputValue;
+    contactToEdit.surname = surnameInputValue;
+    contactToEdit.vacancy = vacancyInputValue;
+    contactToEdit.phone = phoneInputValue;
+    contactToEdit.Id = `${surnameInputValue[0].toLowerCase()}-${new Date().getTime()}`; // Обновляем ID контакта
+
+
+    // Определяем новую букву для фамилии
+    const newLetter = surnameInputValue[0].toLowerCase();
+
+    // Если новый раздел отличается от старого, добавляем контакт в новый раздел
+    if (newLetter !== oldLetter) {
+      if (!contactsByLetter[newLetter]) {
+        contactsByLetter[newLetter] = []; // Создаем новый раздел, если его нет
+      }
+      contactsByLetter[newLetter].push(contactToEdit);
+    } else {
+      // Если буква не изменилась, просто обновляем существующий массив
+      contactsByLetter[oldLetter].push(contactToEdit);
     }
+
+
+
 
     // Сохраняем обновленный список в localStorage
     localStorage.setItem("contacts", JSON.stringify(contactsByLetter));

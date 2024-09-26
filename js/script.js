@@ -405,7 +405,8 @@ window.onload = function () {
                   <strong>Имя:</strong> ${contact.name} <br>
                   <strong>Должность:</strong> ${contact.vacancy} <br>
                   <strong>Телефон:</strong> ${contact.phone}
-                  <button class="edit-btn" data-id="${contact.Id}">Редактировать</button>
+                  <i class="fas fa-edit edit-btn" data-id="${contact.Id}" title="Редактировать"></i>
+                  <i class="fas fa-trash delete-btn" data-id="${contact.Id}" title="Удалить"></i>
                   <hr>
               `;
           output.appendChild(contactItemElement);
@@ -418,6 +419,10 @@ window.onload = function () {
 
     // Добавляем обработчики событий на кнопки редактирования после фильтрации
     addEditButtonHandlers(output);
+
+    addEditButtonHandlers(output);
+    addDeleteButtonHandlers(output);
+
   }
 
 // Вызов функции модальных окон

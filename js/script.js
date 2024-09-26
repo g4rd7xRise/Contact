@@ -273,6 +273,39 @@ window.onload = function () {
     }
   };
 
+  // Функция для удаления контакта
+  function deleteContact(contactId) {
+    console.log("Удаляем контакт с ID:", contactId); // Отладка: выводим ID контакта
+    let found = false; // Флаг для проверки, был ли найден контакт
+
+    for (let letter in contactsByLetter) {
+      const initialLength = contactsByLetter[letter].length; // Сохраняем длину массива перед удалением
+      contactsByLetter[letter] = contactsByLetter[letter].filter(contact => {
+        return contact.Id !== contactId;
+      });
+
+      // Если длина массива изменилась, значит контакт был найден и удален
+      if (contactsByLetter[letter].length < initialLength) {
+        found = true;
+      }
+    }
+
+    if (found) {
+      // Сохраняем обновленный список в localStorage
+      localStorage.setItem('contacts', JSON.stringify(contactsByLetter));
+      console.log("Контакт успешно удален.");
+      displayContacts();
+
+      const output = document.querySelector('.js-popup-output');
+      showAllContacts(output);
+    } else {
+      console.error('Контакт не найден для удаления:', contactId);
+    }
+
+
+
+  }
+
 // Функция для отображения всех контактов в модальном окне
   function showAllContacts(output) {
     output.innerHTML = ''; // Очищаем текущее содержимое
@@ -290,7 +323,8 @@ window.onload = function () {
                 <strong>Имя:</strong> ${contact.name} <br>
                 <strong>Должность:</strong> ${contact.vacancy} <br>
                 <strong>Телефон:</strong> ${contact.phone}
-                <button class="edit-btn" data-id="${contact.Id}">Редактировать</button>
+                <i class="fas fa-edit edit-btn" data-id="${contact.Id}" title="Редактировать"></i>
+                <i class="fas fa-trash delete-btn" data-id="${contact.Id}" title="Удалить"></i>
                 <hr>
             `;
 
@@ -298,12 +332,28 @@ window.onload = function () {
       });
     });
 
+
+
     // Управляем видимостью контейнера
     output.style.display = hasContacts ? 'block' : 'none';
 
     // Добавляем обработчики событий на кнопки редактирования
     addEditButtonHandlers(output);
+    addDeleteButtonHandlers(output);
+
   }
+// Функция для добавления обработчиков событий на кнопки удаления
+  function addDeleteButtonHandlers(output) {
+    const deleteButtons = output.querySelectorAll('.delete-btn');
+    deleteButtons.forEach(button => {
+      button.addEventListener('click', (event) => {
+        const contactId = event.target.dataset.id;
+        console.log("Кнопка удаления нажата для ID:", contactId);
+        deleteContact(contactId); // Вызов функции удаления контакта
+      });
+    });
+  }
+
 
 // Функция для добавления обработчиков событий на кнопки редактирования
   function addEditButtonHandlers(output) {
@@ -442,9 +492,6 @@ window.onload = function () {
       // Если буква не изменилась, просто обновляем существующий массив
       contactsByLetter[oldLetter].push(contactToEdit);
     }
-
-
-
 
     // Сохраняем обновленный список в localStorage
     localStorage.setItem("contacts", JSON.stringify(contactsByLetter));

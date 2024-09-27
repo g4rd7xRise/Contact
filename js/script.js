@@ -1,4 +1,5 @@
 window.onload = function () {
+
   // Структура данных для контакта
   class Contact {
     constructor(name, surname, vacancy, phone) {
@@ -12,6 +13,58 @@ window.onload = function () {
 
   // Объект для хранения контактов по первой букве фамилии
   let contactsByLetter = {};
+
+
+
+// Шаблоны для валидации номеров телефонов
+  const phonePatterns = {
+    'RU': {
+      pattern: /^\+7\s*\(?(\d{3})\)?\s*(\d{3})(?:-?\s*(\d{2}))?(?:-?\s*(\d{2}))?$/,
+      example: '+7 (999) 111-22-33'
+    },
+    'US': {
+      pattern: /^\+1\s*\(?(\d{3})\)?\s*(\d{3})-?(\d{4})$/,
+      example: '+1 (999) 111-2222'
+    },
+    'GB': {
+      pattern: /^\+44\s*\(?(\d{4}|\d{3})\)?\s*(\d{3,4})-?(\d{3,4})$/,
+      example: '+44 20 1234 5678'
+    },
+  };
+
+
+
+
+// Функция для очистки и форматирования номера телефона
+  function formatPhoneNumber(phone) {
+    const cleaned = phone.replace(/\D/g, ''); // Удаляем все нецифровые символы
+
+    let formatted;
+
+    // Обработка номера для России
+    if (cleaned.length === 11 && cleaned.startsWith('7')) {
+      formatted = `+7 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)} ${cleaned.slice(7, 9)}-${cleaned.slice(9, 11)}`;
+    } else if (cleaned.length === 10) {
+      formatted = `+7 (${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)} ${cleaned.slice(6, 8)}-${cleaned.slice(8)}`;
+    } else if (cleaned.length === 12 && cleaned.startsWith('8')) {
+      formatted = `+7 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)} ${cleaned.slice(7, 9)}-${cleaned.slice(9, 11)}`;
+    } else if (cleaned.length === 12 && cleaned.startsWith('79')) {
+      formatted = `+7 (${cleaned.slice(2, 5)}) ${cleaned.slice(5, 8)} ${cleaned.slice(8, 10)}-${cleaned.slice(10)}`;
+    } else if (cleaned.length === 11 && cleaned.startsWith('1')) { // Для номеров США
+      formatted = `+1 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7)}`;
+    } else if (cleaned.length === 10 && cleaned.startsWith('1')) { // Для номеров США без кода страны
+      formatted = `+1 (${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+    } else if (cleaned.length === 12 && cleaned.startsWith('44')) { // Для номеров Великобритании
+      formatted = `+44 ${cleaned.slice(2, cleaned.length - 10)} ${cleaned.slice(-10).replace(/(\d{4})(\d{3})(\d+)/, '$1 $2 $3')}`;
+    } else {
+      return phone; // Если номер не соответствует ожидаемым форматам
+    }
+
+    console.log(`Отформатированный номер: ${formatted}`); // Отладка
+    return formatted;
+  }
+
+
 
   // Функция для нахождения контакта по ID
   function findContactById(contactId) {
@@ -40,15 +93,25 @@ window.onload = function () {
 
   // Функция проверки имени и фамилии
   function isValidName(name) {
-    const namePattern = /^[a-zA-Zа-яА-ЯЁё\s-]+$/;
-    return name.length >= 2 && namePattern.test(name);
+    const namePattern = /^[a-zA-Zа-яА-ЯЁё\s'-]+$/;
+    return name.length >= 2 && namePattern.test(name.trim());
   }
 
-  // Функция проверки номера телефона
-  function isValidPhone(phone) {
-    const cleanedPhone = phone.replace(/\D/g, ""); // Удаляем все нецифровые символы
-    return cleanedPhone.length === 11 && cleanedPhone.startsWith("7"); // Проверяем на 11 цифр и код страны
+// Функция проверки номера телефона
+  function isValidPhone(phone, countryCode) {
+    const { pattern } = phonePatterns[countryCode] || {};
+
+    if (!pattern) {
+      return false;
+    }
+
+    console.log(`Проверка номера: ${phone} на соответствие шаблону для страны ${countryCode}`);
+
+    // Проверяем отформатированный номер на соответствие шаблону
+    return pattern.test(phone);
   }
+
+
 
   // Функция добавления контакта
   function addContact(e) {
@@ -60,31 +123,50 @@ window.onload = function () {
     const vacancyInput = document.getElementById("vacancy");
     const phoneInput = document.getElementById("phone");
 
+    // Получаем код страны из выпадающего списка
+    const countryCodeSelect = document.getElementById("country-code");
+
+
     const name = nameInput.value.trim();
     const surname = surnameInput.value.trim();
     const vacancy = vacancyInput.value.trim();
     const phone = phoneInput.value.trim();
+    const countryCode = countryCodeSelect.value;
+
+
+
+
+    // Форматируем номер телефона перед проверкой валидности
+    let formattedPhone;
+    try {
+      formattedPhone = formatPhoneNumber(phone);
+      console.log(`Отформатированный номер: ${formattedPhone}`);
+    } catch (error) {
+      showError(error.message);
+      return;
+    }
+
+
 
     // Валидация данных
     if (!isValidName(surname)) {
-      showError(
-        "Фамилия должна содержать только буквы и пробелы и быть не менее 2 символов"
-      );
+      showError("Фамилия должна содержать только буквы и быть не менее двух символов.");
       return;
     }
+
     if (!isValidName(name)) {
-      showError(
-        "Имя должно содержать только буквы и пробелы и быть не менее 2 символов."
-      );
+      showError("Имя должно содержать только буквы и быть не менее двух символов.");
       return;
     }
-    if (!isValidPhone(phone)) {
-      showError("Номер телефона должен быть в формате: +7 (XXX) XXX-XX-XX.");
+
+    // Проверяем валидность отформатированного номера
+    if (!isValidPhone(formattedPhone, countryCode)) {
+      showError(`Номер телефона должен соответствовать формату: ${phonePatterns[countryCode].example}`);
       return;
     }
 
     // Создание нового контакта
-    const newContact = new Contact(name, surname, vacancy, phone);
+    const newContact = new Contact(name, surname, vacancy, formattedPhone);
 
     // Получение первой буквы фамилии в нижнем регистре
     const firstLetter = surname[0].toLowerCase();
@@ -119,9 +201,8 @@ window.onload = function () {
   function showError(message) {
     const errorHolder = document.querySelector(".error.js-error");
     errorHolder.textContent = message;
-    errorHolder.style.display = "block"; // Показываем ошибку
+    errorHolder.style.display = "block";
 
-    // Скрываем ошибку через несколько секунд
     setTimeout(() => {
       errorHolder.style.display = "none";
     }, 5000);
@@ -132,24 +213,18 @@ window.onload = function () {
     const contactTableElement = document.getElementById("contactTable");
     contactTableElement.innerHTML = "";
 
-    // Создание элементов таблицы на основе объекта contactsByLetter
     Object.keys(contactsByLetter).forEach((letter) => {
       if (contactsByLetter[letter].length > 0) {
-        // Проверяем наличие контактов
-        // Создание элемента колонки
         const columnElement = document.createElement("div");
         columnElement.classList.add("contact-table__column", "column");
 
-        // Создание элемента буквы
         const letterElement = document.createElement("div");
         letterElement.classList.add("column__element", "element");
         letterElement.dataset.id = letter;
 
         const letterTextElement = document.createElement("div");
         letterTextElement.classList.add("element__letter", "js-column-letter");
-        letterTextElement.textContent = `${letter.toUpperCase()} (${
-          contactsByLetter[letter].length
-        })`; // Отображаем букву в верхнем регистре
+        letterTextElement.textContent = `${letter.toUpperCase()} (${contactsByLetter[letter].length})`;
 
         letterTextElement.addEventListener("click", () => {
           contactsElement.classList.toggle("hidden");
@@ -158,30 +233,22 @@ window.onload = function () {
         letterElement.appendChild(letterTextElement);
         columnElement.appendChild(letterElement);
 
-        // Создание элемента для контактов
         const contactsElement = document.createElement("div");
         contactsElement.classList.add("column__element", "contacts", "hidden");
         contactsElement.dataset.id = `contacts-${letter}`;
-        //Добавление контактов в элемент
 
-        const contacts = contactsByLetter[letter];
-
-        // Добавление контактов в элемент
-        contacts.forEach((contact) => {
-          // Создаем элемент для контакта
+        contactsByLetter[letter].forEach((contact) => {
           const contactItemElement = document.createElement("div");
           contactItemElement.classList.add("contact-item");
 
-          // Заполнение элемента информацией о контакте
           contactItemElement.innerHTML = `
-        <strong>Фамилия:</strong> ${contact.surname} <br>
-        <strong>Имя:</strong> ${contact.name} <br>
-        <strong>Должность:</strong> ${contact.vacancy} <br>
-        <strong>Телефон:</strong> ${contact.phone}
-        <hr>
-    `;
+           <strong>Фамилия:</strong> ${contact.surname} <br>
+           <strong>Имя:</strong> ${contact.name} <br>
+           <strong>Должность:</strong> ${contact.vacancy} <br>
+           <strong>Телефон:</strong> ${contact.phone}
+           <hr>
+         `;
 
-          // Добавление элемента в родительский элемент
           contactsElement.appendChild(contactItemElement);
         });
 
@@ -193,12 +260,10 @@ window.onload = function () {
 
   // Функция очистки таблицы
   function clearContacts() {
-    const confirmation = confirm("Вы уверены, что хотите удалить все контакт?");
+    const confirmation = confirm("Вы уверены, что хотите удалить все контакты?");
     if (confirmation) {
       contactsByLetter = {};
-
       localStorage.removeItem("contacts");
-
       displayContacts();
       const output = document.querySelector(".js-popup-output");
       output.innerHTML = ""; // Очищаем текущий вывод в модальном окне
@@ -437,11 +502,22 @@ window.onload = function () {
     // Сохраняем информацию о том, какой контакт редактируется
     editPopup.dataset.id = id;
 
+    // Заполняем поля ввода данными контакта
+    const contactToEdit = findContactById(id);
+    document.querySelector('.js-edit-name-input').value = contactToEdit.name;
+    document.querySelector('.js-edit-surname-input').value = contactToEdit.surname;
+    document.querySelector('.js-edit-vacancy-input').value = contactToEdit.vacancy;
+    document.querySelector('.js-edit-phone-input').value = contactToEdit.phone;
+
+    // Очищаем поле вывода ошибок
+    const editErrorHolder = document.querySelector('.js-edit-error');
+    editErrorHolder.textContent = '';
+
     editPopup.style.display = "block";
     overlay.style.display = "block";
   }
 
-  // Функция закрытия модального окна редактирования
+// Функция закрытия модального окна редактирования
   function closeEditPopup() {
     const editPopup = document.getElementById("editPopup");
     const overlay = document.getElementById("editPopupOverlay");
@@ -450,23 +526,50 @@ window.onload = function () {
     overlay.style.display = "none";
   }
 
-  // Обработчик события для закрытия модального окна без изменений
+// Обработчик события для закрытия модального окна без изменений
   const closeEditButton = document.querySelector(".js-edit-popup-close");
   closeEditButton.addEventListener("click", () => {
     closeEditPopup();
   });
 
-  // Обработчик события для редактирования контакта
+// Обработчик события для редактирования контакта
   const submitEditButton = document.querySelector('.js-submit-edit-btn');
   submitEditButton.addEventListener('click', function () {
     const editPopup = document.getElementById('editPopup');
     const contactId = editPopup.dataset.id;
 
     // Получаем данные из полей ввода редактирования
-    const nameInputValue = document.querySelector('.js-edit-name-input').value;
-    const surnameInputValue = document.querySelector('.js-edit-surname-input').value;
-    const vacancyInputValue = document.querySelector('.js-edit-vacancy-input').value;
-    const phoneInputValue = document.querySelector('.js-edit-phone-input').value;
+    const nameInputValue = document.querySelector('.js-edit-name-input').value.trim();
+    const surnameInputValue = document.querySelector('.js-edit-surname-input').value.trim();
+    const vacancyInputValue = document.querySelector('.js-edit-vacancy-input').value.trim();
+    const phoneInputValue = document.querySelector('.js-edit-phone-input').value.trim();
+
+    // Валидация данных перед обновлением
+    if (!isValidName(surnameInputValue)) {
+      showEditError("Фамилия должна содержать только буквы и быть не менее двух символов.");
+      return;
+    }
+
+    if (!isValidName(nameInputValue)) {
+      showEditError("Имя должно содержать только буквы и быть не менее двух символов.");
+      return;
+    }
+
+    // Форматируем номер телефона перед проверкой валидности
+    let formattedPhone;
+    try {
+      formattedPhone = formatPhoneNumber(phoneInputValue);
+      console.log(`Отформатированный номер: ${formattedPhone}`);
+    } catch (error) {
+      showEditError(error.message);
+      return;
+    }
+
+    // Проверяем валидность отформатированного номера
+    if (!isValidPhone(formattedPhone, 'RU')) { // Предполагаем проверку для России
+      showEditError(`Номер телефона должен соответствовать формату: ${phonePatterns['RU'].example}`);
+      return;
+    }
 
     let contactToEdit = findContactById(contactId);
 
@@ -474,15 +577,11 @@ window.onload = function () {
     const oldLetter = contactToEdit.Id[0]; // Используем первую букву ID для определения старого раздела
     contactsByLetter[oldLetter] = contactsByLetter[oldLetter].filter(contact => contact.Id !== contactId);
 
-
-
     // Обновляем данные контакта
     contactToEdit.name = nameInputValue;
     contactToEdit.surname = surnameInputValue;
     contactToEdit.vacancy = vacancyInputValue;
-    contactToEdit.phone = phoneInputValue;
-    contactToEdit.Id = `${surnameInputValue[0].toLowerCase()}-${new Date().getTime()}`; // Обновляем ID контакта
-
+    contactToEdit.phone = formattedPhone; // Используем отформатированный номер телефона
 
     // Определяем новую букву для фамилии
     const newLetter = surnameInputValue[0].toLowerCase();
@@ -503,7 +602,7 @@ window.onload = function () {
 
     // Закрываем окно редактирования и обновляем список в поисковом окне
     closeEditPopup();
-    displayContacts()
+    displayContacts();
 
     // Обновляем отображение контактов без перезагрузки страницы
     const output = document.querySelector(".js-popup-output"); // Получаем элемент вывода
@@ -511,6 +610,16 @@ window.onload = function () {
     showAllContacts(output); // Отображаем обновленные контакты
 
   });
+
+  // Функция для отображения ошибок в модальном окне редактирования
+  function showEditError(message) {
+    const editErrorHolder = document.querySelector('.js-edit-error');
+    editErrorHolder.textContent = message; // Отображаем сообщение об ошибке в модальном окне
+
+    setTimeout(() => {
+      editErrorHolder.textContent = ''; // Очищаем сообщение через 5 секунд (или можно сделать по клику на кнопку)
+    }, 5000);
+  }
 
   // Загрузка контактов из localStorage при загрузке страницы
   loadContacts();

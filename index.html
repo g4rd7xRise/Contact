@@ -6,7 +6,7 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Contacts</title>
-    <script src="./js/script.js" defer></script>
+    <script  src="./js/script.js" defer></script>
     <link rel="icon" href="./icons/favicon.svg" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="./css/reset.css">
@@ -39,9 +39,21 @@
             <input type="text" id="vacancy" class="form-inputs js-vacancy-input" placeholder="Должность">
         </div>
 
+
+
         <div class="inputs__item">
-            <label for="phone" class="visually-hidden"></label>
-            <input type="tel" id="phone" class="form-inputs js-phone-input" placeholder="Телефон 123-456-7890"  required>
+            <label for="phone" class="visually-hidden">Телефон</label>
+            <input type="tel" id="phone" class="form-inputs js-phone-input" placeholder="Номер телефона" required>
+        </div>
+
+        <div class="inputs__item">
+            <label for="country-code" class="visually-hidden">Код страны</label>
+            <select id="country-code" class="form-inputs js-country-code" required>
+                <option value="RU">+7 (Россия) - Пример: 7 (999) 111 22-33</option>
+                <option value="US">+1 (США) - Пример: 1 (999) 111-2222</option>
+                <option value="GB">+44 (Великобритания) - Пример: 44 20 1234 5678</option>
+                <!-- Добавьте другие страны по необходимости -->
+            </select>
         </div>
 
         <div class="inputs__item">
@@ -69,7 +81,7 @@
             <input type="text" placeholder="Поиск..." class="search-popup__input js-search-input" aria-label="Поиск контактов">
             <button class="search-popup__show-all js-show-all-btn">Показать все</button>
             <div class="search-popup__output js-popup-output"></div>
-            <button class="fa fa-window-close search-popup__close js-popup-close">×</button>
+            <button class="fa fa-window-close search-popup__close js-popup-close"></button>
         </div>
 
         <!-- Попап для редактирования контактов -->
@@ -80,8 +92,11 @@
             <input type="text" class="edit-popup__inputs__surname js-edit-surname-input" placeholder="Фамилия">
             <input type="text" class="edit-popup__inputs__vacancy js-edit-vacancy-input" placeholder="Должность">
             <input type="text" class="edit-popup__inputs__phone js-edit-phone-input" placeholder="Телефон">
+            <div class="error-holder">
+                <div class="error js-edit-error"></div>
+            </div>
             <button class="edit-popup__submit js-submit-edit-btn">Редактировать</button>
-            <button class="fa fa-window-close edit-popup__close js-edit-popup-close">×</button>
+            <button class="fa fa-window-close edit-popup__close js-edit-popup-close"></button>
         </div>
     </footer>
 </div>

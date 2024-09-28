@@ -14,8 +14,6 @@ window.onload = function () {
   // Объект для хранения контактов по первой букве фамилии
   let contactsByLetter = {};
 
-
-
 // Шаблоны для валидации номеров телефонов
   const phonePatterns = {
     'RU': {
@@ -31,9 +29,6 @@ window.onload = function () {
       example: '+44 20 1234 5678'
     },
   };
-
-
-
 
 // Функция для очистки и форматирования номера телефона
   function formatPhoneNumber(phone) {
@@ -63,8 +58,6 @@ window.onload = function () {
     console.log(`Отформатированный номер: ${formatted}`); // Отладка
     return formatted;
   }
-
-
 
   // Функция для нахождения контакта по ID
   function findContactById(contactId) {
@@ -111,8 +104,6 @@ window.onload = function () {
     return pattern.test(phone);
   }
 
-
-
   // Функция добавления контакта
   function addContact(e) {
     e.preventDefault();
@@ -125,16 +116,11 @@ window.onload = function () {
 
     // Получаем код страны из выпадающего списка
     const countryCodeSelect = document.getElementById("country-code");
-
-
     const name = nameInput.value.trim();
     const surname = surnameInput.value.trim();
     const vacancy = vacancyInput.value.trim();
     const phone = phoneInput.value.trim();
     const countryCode = countryCodeSelect.value;
-
-
-
 
     // Форматируем номер телефона перед проверкой валидности
     let formattedPhone;
@@ -145,8 +131,6 @@ window.onload = function () {
       showError(error.message);
       return;
     }
-
-
 
     // Валидация данных
     if (!isValidName(surname)) {
@@ -246,7 +230,6 @@ window.onload = function () {
            <strong>Имя:</strong> ${contact.name} <br>
            <strong>Должность:</strong> ${contact.vacancy} <br>
            <strong>Телефон:</strong> ${contact.phone}
-           <hr>
          `;
 
           contactsElement.appendChild(contactItemElement);
@@ -366,9 +349,6 @@ window.onload = function () {
     } else {
       console.error('Контакт не найден для удаления:', contactId);
     }
-
-
-
   }
 
 // Функция для отображения всех контактов в модальном окне
@@ -389,15 +369,12 @@ window.onload = function () {
                 <strong>Должность:</strong> ${contact.vacancy} <br>
                 <strong>Телефон:</strong> ${contact.phone}
                 <i class="fas fa-edit edit-btn" data-id="${contact.Id}" title="Редактировать"></i>
-                <i class="fas fa-trash delete-btn" data-id="${contact.Id}" title="Удалить"></i>
-                <hr>
+                <i class="fas fa-trash delete-btn" data-id="${contact.Id}" title="Удалить"></i>              
             `;
 
         output.appendChild(contactItemElement);
       });
     });
-
-
 
     // Управляем видимостью контейнера
     output.style.display = hasContacts ? 'block' : 'none';

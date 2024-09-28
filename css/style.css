@@ -254,8 +254,12 @@ button:active {
 }
 
 .element__letter {
-    background-color: #000;
-    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    /*text-align: center;*/
+    margin-bottom: 10px;
+    cursor: pointer;
 }
 
 .hidden {
@@ -275,10 +279,18 @@ button:active {
     display: block; /* Показываем только если есть содержимое */
 }
 .contact-item {
+    border: 1px solid #ccc; /* Добавьте границу для лучшего визуального восприятия */
+    padding: 10px; /* Добавьте немного внутреннего отступа */
+    margin-top: 10px; /* Отступ сверху для отделения от других элементов */
     position: relative; /* Убедитесь, что элементы не перекрываются */
 }
 
 .delete-btn,
 .edit-btn {
     cursor: pointer; /* Убедитесь, что курсор меняется на указатель */
+}
+
+.search-popup__show-all{
+ margin-left: 35%;
+ margin-top: 12px;
 }

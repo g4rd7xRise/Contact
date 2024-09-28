@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
@@ -8,8 +8,7 @@
     <title>Contacts</title>
     <script  src="./js/script.js" defer></script>
     <link rel="icon" href="./icons/favicon.svg" type="image/x-icon">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />    <link rel="stylesheet" href="./css/reset.css">
     <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
@@ -74,24 +73,40 @@
 </main>
 
     <footer>
-        <!-- Попап для поиска контактов -->
+        <!-- Модальное окно для поиска контактов -->
         <div class="modal-overlay modalOverlay" id="searchPopupOverlay"></div>
         <div class="search-popup popup" id="searchPopup">
             <h2>Поиск контакта</h2>
             <input type="text" placeholder="Поиск..." class="search-popup__input js-search-input" aria-label="Поиск контактов">
-            <button class="search-popup__show-all js-show-all-btn">Показать все</button>
             <div class="search-popup__output js-popup-output"></div>
             <button class="fa fa-window-close search-popup__close js-popup-close"></button>
+            <button class="search-popup__show-all js-show-all-btn">Показать все</button>
         </div>
 
-        <!-- Попап для редактирования контактов -->
+        <!-- Модальное окно для редактирования контактов -->
         <div class="modal-overlay modalOverlay" id="editPopupOverlay"></div>
         <div class="edit-popup popup" id="editPopup">
             <h2>Редактировать контакт</h2>
+            <label>
+                Name:
             <input type="text" class="edit-popup__inputs__name js-edit-name-input" placeholder="Имя">
+            </label>
+
+            <label>
+                Surname:
             <input type="text" class="edit-popup__inputs__surname js-edit-surname-input" placeholder="Фамилия">
+            </label>
+
+            <label>
+                Vacancy:
             <input type="text" class="edit-popup__inputs__vacancy js-edit-vacancy-input" placeholder="Должность">
+            </label>
+
+            <label>
+                Phone:
             <input type="text" class="edit-popup__inputs__phone js-edit-phone-input" placeholder="Телефон">
+            </label>
+
             <div class="error-holder">
                 <div class="error js-edit-error"></div>
             </div>

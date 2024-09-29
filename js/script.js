@@ -192,7 +192,7 @@ window.onload = function () {
     }, 5000);
   }
 
-  // Функция отображения контактов в таблице
+// Функция отображения контактов в таблице
   function displayContacts() {
     const contactTableElement = document.getElementById("contactTable");
     contactTableElement.innerHTML = "";
@@ -210,15 +210,17 @@ window.onload = function () {
         letterTextElement.classList.add("element__letter", "js-column-letter");
         letterTextElement.textContent = `${letter.toUpperCase()} (${contactsByLetter[letter].length})`;
 
+        // Обработчик клика для переключения видимости контактов
         letterTextElement.addEventListener("click", () => {
-          contactsElement.classList.toggle("hidden");
+          const contactsElement = columnElement.querySelector('.contacts');
+          contactsElement.classList.toggle('visible'); // Переключаем класс visible
         });
 
         letterElement.appendChild(letterTextElement);
         columnElement.appendChild(letterElement);
 
         const contactsElement = document.createElement("div");
-        contactsElement.classList.add("column__element", "contacts", "hidden");
+        contactsElement.classList.add("column__element", "contacts"); // Убираем класс hidden
         contactsElement.dataset.id = `contacts-${letter}`;
 
         contactsByLetter[letter].forEach((contact) => {
@@ -226,11 +228,11 @@ window.onload = function () {
           contactItemElement.classList.add("contact-item");
 
           contactItemElement.innerHTML = `
-           <strong>Фамилия:</strong> ${contact.surname} <br>
-           <strong>Имя:</strong> ${contact.name} <br>
-           <strong>Должность:</strong> ${contact.vacancy} <br>
-           <strong>Телефон:</strong> ${contact.phone}
-         `;
+                    <strong>Фамилия:</strong> ${contact.surname} <br>
+                    <strong>Имя:</strong> ${contact.name} <br>
+                    <strong>Должность:</strong> ${contact.vacancy} <br>
+                    <strong>Телефон:</strong> ${contact.phone}
+                `;
 
           contactsElement.appendChild(contactItemElement);
         });

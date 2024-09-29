@@ -48,9 +48,8 @@ body {
 }
 
 .inputs__item label {
-    display: none; /* Скрываем метки, если они не нужны */
+    display: none;
 }
-
 
 .inputs__item .form-inputs{
     width: 50%;
@@ -61,7 +60,7 @@ body {
 }
 
 .inputs__item input:focus {
-    border-color: #007BFF; /* Цвет рамки при фокусе */
+    border-color: #007BFF;
 }
 
 /* Error messages */
@@ -75,18 +74,18 @@ button {
     padding: 10px 15px;
     border-radius: 5px;
     border: none;
-    background-color: #007BFF; /* Цвет кнопок */
+    background-color: #007BFF;
     color: white;
     cursor: pointer;
     transition: background-color 0.3s ease-in-out, transform 0.1s ease-in-out; /* Плавный переход */
 }
 
 .input-btn:hover {
-    background-color: #0056b3; /* Темнее при наведении */
+    background-color: #0056b3;
 }
 
 button:active {
-    transform: scale(0.95); /* Эффект нажатия */
+    transform: scale(0.95);
 }
 
 
@@ -126,7 +125,7 @@ button:active {
 
 /* Popup styles */
 .popup {
-    display: none; /* Скрыто по умолчанию */
+    display: none;
     position: fixed;
     top: 50%;
     left: 50%;
@@ -135,7 +134,7 @@ button:active {
     padding: 20px;
     background-color: white;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    z-index: 1000; /* Чтобы попап был выше других элементов */
+    z-index: 1000;
 }
 
 .popup h2 {
@@ -190,17 +189,14 @@ button:active {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5); /* Затемнение */
-    display: none; /* Скрываем по умолчанию */
-    z-index: 200; /* Убедитесь, что оно выше других элементов */
+    display: none;
+    z-index: 200;
 }
-
-
 
 /* Close button for popups */
 .fa-window-close {
     cursor:pointer;
 }
-
 
 /* Responsive styles */
 @media (max-width: 600px) {
@@ -229,16 +225,17 @@ button:active {
 }
 
 .modalOverlay {
-    display: none; /* Скрыто по умолчанию */
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
+    transition: opacity 0.5s ease;
 }
 .modal {
-    display: none; /* Скрыто по умолчанию */
+    display: none;
     position: fixed;
     top: 50%;
     left: 50%;
@@ -267,30 +264,49 @@ button:active {
 }
 
 .js-popup-output {
-    max-height: 300px; /* Установите максимальную высоту по вашему усмотрению */
-    overflow-y: auto; /* Включаем вертикальную прокрутку */
-    border: 1px solid #ccc; /* Добавьте границу для лучшего визуального восприятия */
-    padding: 10px; /* Добавьте немного внутреннего отступа */
-    margin-top: 10px; /* Отступ сверху для отделения от других элементов */
-    display: none; /* Скрываем по умолчанию */
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-top: 10px;
+    display: none;
 }
 
 .js-popup-output:not(:empty) {
-    display: block; /* Показываем только если есть содержимое */
+    display: block;
 }
 .contact-item {
-    border: 1px solid #ccc; /* Добавьте границу для лучшего визуального восприятия */
-    padding: 10px; /* Добавьте немного внутреннего отступа */
-    margin-top: 10px; /* Отступ сверху для отделения от других элементов */
-    position: relative; /* Убедитесь, что элементы не перекрываются */
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-top: 10px;
+    position: relative;
 }
 
 .delete-btn,
 .edit-btn {
-    cursor: pointer; /* Убедитесь, что курсор меняется на указатель */
+    cursor: pointer;
 }
 
 .search-popup__show-all{
  margin-left: 35%;
  margin-top: 12px;
+ transition: opacity 0.5s ease;
+}
+
+.contacts {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: opacity 0.5s ease, max-height 0.5s ease;
+}
+
+.contacts.visible {
+    opacity: 1;
+    max-height: 500px;
+}
+
+.modalOverlay.visible,
+.search-popup.visible {
+    display: block;
+    opacity: 1;
 }

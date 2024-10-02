@@ -1,204 +1,204 @@
 window.onload = function (): void {
 
   // Структура данных для контакта
-  class Contact {
-    name: any;
-    surname: any;
-    vacancy: any;
-    phone: any;
-    Id: any;
+      class Contact {
+        name: string;
+        surname: string;
+        vacancy: string;
+        phone: string;
+        Id: string;
 
-    constructor(name: any, surname: any, vacancy: any, phone: any) {
-      this.name = name;
-      this.surname = surname;
-      this.vacancy = vacancy;
-      this.phone = phone;
-      this.Id = `${surname[0].toLowerCase()}-${new Date().getTime()}`
-    }
-  }
+        constructor(name: string, surname: string, vacancy: string, phone: string) {
+          this.name = name;
+          this.surname = surname;
+          this.vacancy = vacancy;
+          this.phone = phone;
+          this.Id = `${surname[0].toLowerCase()}-${new Date().getTime()}`
+        }
+      }
 
-  // Объект для хранения контактов по первой букве фамилии
-  let contactsByLetter: {[key: string]:any} = {};
+      // Объект для хранения контактов по первой букве фамилии
+      let contactsByLetter: {[key: string]: Contact[] } = {};
 
 // Шаблоны для валидации номеров телефонов
-  interface PhonePattern {
-    pattern: RegExp;
-    example: string;
-  }
+      interface PhonePattern {
+        pattern: RegExp;
+        example: string;
+      }
 
-  interface PhonePatterns {
-    [key: string]: PhonePattern;
-  }
+      interface PhonePatterns {
+        [key: string]: PhonePattern;
+      }
 
-  const phonePatterns: PhonePatterns  = {
-    'RU': {
-      pattern: /^\+7\s*\(?(\d{3})\)?\s*(\d{3})(?:-?\s*(\d{2}))?(?:-?\s*(\d{2}))?$/,
-      example: '+7 (999) 111-22-33'
-    },
-    'US': {
-      pattern: /^\+1\s*\(?(\d{3})\)?\s*(\d{3})-?(\d{4})$/,
-      example: '+1 (999) 111-2222'
-    },
-    'GB': {
-      pattern: /^\+44\s*\(?(\d{4}|\d{3})\)?\s*(\d{3,4})-?(\d{3,4})$/,
-      example: '+44 20 1234 5678'
-    },
-  };
+      const phonePatterns: PhonePatterns  = {
+        'RU': {
+          pattern: /^\+7\s*\(?(\d{3})\)?\s*(\d{3})(?:-?\s*(\d{2}))?(?:-?\s*(\d{2}))?$/,
+          example: '+7 (999) 111-22-33'
+        },
+        'US': {
+          pattern: /^\+1\s*\(?(\d{3})\)?\s*(\d{3})-?(\d{4})$/,
+          example: '+1 (999) 111-2222'
+        },
+        'GB': {
+          pattern: /^\+44\s*\(?(\d{4}|\d{3})\)?\s*(\d{3,4})-?(\d{3,4})$/,
+          example: '+44 20 1234 5678'
+        }
+      };
 
 // Функция для очистки и форматирования номера телефона
-  function formatPhoneNumber(phone: any): any {
-    const cleaned = phone.replace(/\D/g, ''); // Удаляем все нецифровые символы
+      function formatPhoneNumber(phone: string): string {
+        const cleaned = phone.replace(/\D/g, ''); // Удаляем все нецифровые символы
 
-    let formatted: any;
+        let formatted: any;
 
-    // Обработка номера для России
-    if (cleaned.length === 11 && cleaned.startsWith('7')) {
-      formatted = `+7 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)} ${cleaned.slice(7, 9)}-${cleaned.slice(9, 11)}`;
-    } else if (cleaned.length === 10) {
-      formatted = `+7 (${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)} ${cleaned.slice(6, 8)}-${cleaned.slice(8)}`;
-    } else if (cleaned.length === 12 && cleaned.startsWith('8')) {
-      formatted = `+7 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)} ${cleaned.slice(7, 9)}-${cleaned.slice(9, 11)}`;
-    } else if (cleaned.length === 12 && cleaned.startsWith('79')) {
-      formatted = `+7 (${cleaned.slice(2, 5)}) ${cleaned.slice(5, 8)} ${cleaned.slice(8, 10)}-${cleaned.slice(10)}`;
-    } else if (cleaned.length === 11 && cleaned.startsWith('1')) { // Для номеров США
-      formatted = `+1 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7)}`;
-    } else if (cleaned.length === 10 && cleaned.startsWith('1')) { // Для номеров США без кода страны
-      formatted = `+1 (${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
-    } else if (cleaned.length === 12 && cleaned.startsWith('44')) { // Для номеров Великобритании
-      formatted = `+44 ${cleaned.slice(2, cleaned.length - 10)} ${cleaned.slice(-10).replace(/(\d{4})(\d{3})(\d+)/, '$1 $2 $3')}`;
-    } else {
-      return phone; // Если номер не соответствует ожидаемым форматам
-    }
+        // Обработка номера для России
+        if (cleaned.length === 11 && cleaned.startsWith('7')) {
+          formatted = `+7 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)} ${cleaned.slice(7, 9)}-${cleaned.slice(9, 11)}`;
+        } else if (cleaned.length === 10) {
+          formatted = `+7 (${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)} ${cleaned.slice(6, 8)}-${cleaned.slice(8)}`;
+        } else if (cleaned.length === 12 && cleaned.startsWith('8')) {
+          formatted = `+7 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)} ${cleaned.slice(7, 9)}-${cleaned.slice(9, 11)}`;
+        } else if (cleaned.length === 12 && cleaned.startsWith('79')) {
+          formatted = `+7 (${cleaned.slice(2, 5)}) ${cleaned.slice(5, 8)} ${cleaned.slice(8, 10)}-${cleaned.slice(10)}`;
+        } else if (cleaned.length === 11 && cleaned.startsWith('1')) { // Для номеров США
+          formatted = `+1 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7)}`;
+        } else if (cleaned.length === 10 && cleaned.startsWith('1')) { // Для номеров США без кода страны
+          formatted = `+1 (${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+        } else if (cleaned.length === 12 && cleaned.startsWith('44')) { // Для номеров Великобритании
+          formatted = `+44 ${cleaned.slice(2, cleaned.length - 10)} ${cleaned.slice(-10).replace(/(\d{4})(\d{3})(\d+)/, '$1 $2 $3')}`;
+        } else {
+          return phone; // Если номер не соответствует ожидаемым форматам, возвращаем исходный номер
+        }
 
-    console.log(`Отформатированный номер: ${formatted}`); // Отладка
-    return formatted;
-  }
+        console.log(`Отформатированный номер: ${formatted}`); // Отладка
+        return formatted || phone;
+      }
 
-  // Функция для нахождения контакта по ID
-  function findContactById(contactId: any): Contact | null {
-    for (const letter in contactsByLetter) {
-      const contact = contactsByLetter[letter].find((c: Contact ): boolean => c.Id === contactId);
-      if (contact) return contact;
-    }
-    return null; // Возвращаем null, если контакт не найден
-  }
+      // Функция для нахождения контакта по ID
+      function findContactById(contactId: any): Contact | null {
+        for (const letter in contactsByLetter) {
+          const contact = contactsByLetter[letter].find((c: Contact ): boolean => c.Id === contactId);
+          if (contact) return contact;
+        }
+        return null; // Возвращаем null, если контакт не найден
+      }
 
-  //Функция для загрузки контактов из localStorage
+      //Функция для загрузки контактов из localStorage
 
-  function loadContacts(): void {
-    console.log("Функция loadContacts вызвана"); // Отладка
-    const storedContacts: any | null = localStorage.getItem("contacts");
-    console.log("Загружаемые данные из localStorage:", storedContacts); // Отладка
+      function loadContacts(): void {
+        console.log("Функция loadContacts вызвана"); // Отладка
+        const storedContacts = localStorage.getItem("contacts");
+        console.log("Загружаемые данные из localStorage:", storedContacts); // Отладка
 
-    if (storedContacts) {
-      contactsByLetter = JSON.parse(storedContacts);
-      displayContacts(); // Отображаем загруженные контакты
-    }
-  }
+        if (storedContacts) {
+          contactsByLetter = JSON.parse(storedContacts);
+          displayContacts(); // Отображаем загруженные контакты
+        }
+      }
 
-  // Функция проверки имени и фамилии
-  function isValidName(name: string): boolean {
-    const namePattern = /^[a-zA-Zа-яА-ЯЁё\s'-]+$/;
-    return name.length >= 2 && namePattern.test(name.trim());
-  }
+      // Функция проверки имени и фамилии
+      function isValidName(name: string): boolean {
+        const namePattern = /^[a-zA-Zа-яА-ЯЁё\s'-]+$/;
+        return name.length >= 2 && namePattern.test(name.trim());
+      }
 
 // Функция проверки номера телефона
-  function isValidPhone(phone: any, countryCode: keyof typeof phonePatterns): boolean {
-    const {pattern} = phonePatterns[countryCode] || {};
+      function isValidPhone(phone: any, countryCode: keyof typeof phonePatterns): boolean {
+        const {pattern} = phonePatterns[countryCode] || {};
 
-    if (!pattern) {
-      return false;
-    }
+        if (!pattern) {
+          return false;
+        }
 
-    console.log(`Проверка номера: ${phone} на соответствие шаблону для страны ${countryCode}`);
+        console.log(`Проверка номера: ${phone} на соответствие шаблону для страны ${countryCode}`);
 
-    // Проверяем отформатированный номер на соответствие шаблону
-    return pattern.test(phone);
-  }
+        // Проверяем отформатированный номер на соответствие шаблону
+        return pattern.test(phone);
+      }
 
-  // Функция добавления контакта
-  function addContact(e: Event): void {
-    e.preventDefault();
+      // Функция добавления контакта
+      function addContact(e: Event): void {
+        e.preventDefault();
 
-    // Получение значений из полей ввода
-    const nameInput = document.getElementById("name") as HTMLInputElement;
-    const surnameInput = document.getElementById("surname") as HTMLInputElement;
-    const vacancyInput = document.getElementById("vacancy") as HTMLInputElement;
-    const phoneInput = document.getElementById("phone") as HTMLInputElement;
+        // Получение значений из полей ввода
+        const nameInput = document.getElementById("name") as HTMLInputElement;
+        const surnameInput = document.getElementById("surname") as HTMLInputElement;
+        const vacancyInput = document.getElementById("vacancy") as HTMLInputElement;
+        const phoneInput = document.getElementById("phone") as HTMLInputElement;
 
-    // Получаем код страны из выпадающего списка
-    const countryCodeSelect = document.getElementById("country-code") as HTMLInputElement;
+        // Получаем код страны из выпадающего списка
+        const countryCodeSelect = document.getElementById("country-code") as HTMLInputElement;
 
-    const name: any = nameInput.value.trim();
-    const surname: any = surnameInput.value.trim();
-    const vacancy: any = vacancyInput.value.trim();
-    const phone: any = phoneInput.value.trim();
-    const countryCode: any = countryCodeSelect.value;
+        const name: any = nameInput.value.trim();
+        const surname: any = surnameInput.value.trim();
+        const vacancy: any = vacancyInput.value.trim();
+        const phone: any = phoneInput.value.trim();
+        const countryCode: any = countryCodeSelect.value;
 
-    // Форматируем номер телефона перед проверкой валидности
-    let formattedPhone: any;
-    try {
-      formattedPhone = formatPhoneNumber(phone);
-    } catch (error) {
-      showError((error as Error).message);
-      return;
-    }
+        // Форматируем номер телефона перед проверкой валидности
+        let formattedPhone: any;
+        try {
+          formattedPhone = formatPhoneNumber(phone);
+        } catch (error) {
+          showError((error as Error).message);
+          return;
+        }
 
-    // Валидация данных
-    if (!isValidName(surname)) {
-      showError("Фамилия должна содержать только буквы и быть не менее двух символов.");
-      return;
-    }
+        // Валидация данных
+        if (!isValidName(surname)) {
+          showError("Фамилия должна содержать только буквы и быть не менее двух символов.");
+          return;
+        }
 
-    if (!isValidName(name)) {
-      showError("Имя должно содержать только буквы и быть не менее двух символов.");
-      return;
-    }
+        if (!isValidName(name)) {
+          showError("Имя должно содержать только буквы и быть не менее двух символов.");
+          return;
+        }
 
-    // Проверяем валидность отформатированного номера
-    if (!isValidPhone(formattedPhone, countryCode)) {
-      showError(`Номер телефона должен соответствовать формату: ${phonePatterns[countryCode].example}`);
-      return;
-    }
+        // Проверяем валидность отформатированного номера
+        if (!isValidPhone(formattedPhone, countryCode)) {
+          showError(`Номер телефона должен соответствовать формату: ${phonePatterns[countryCode].example}`);
+          return;
+        }
 
-    // Создание нового контакта
-    const newContact = new Contact(name, surname, vacancy, formattedPhone);
+        // Создание нового контакта
+        const newContact = new Contact(name, surname, vacancy, formattedPhone);
 
-    // Получение первой буквы фамилии в нижнем регистре
-    const firstLetter: any = surname[0].toLowerCase();
+        // Получение первой буквы фамилии в нижнем регистре
+        const firstLetter: any = surname[0].toLowerCase();
 
-    // Если ключа не существует в объекте, создаем новый массив
-    if (!contactsByLetter[firstLetter]) {
-      contactsByLetter[firstLetter] = [];
-    }
+        // Если ключа не существует в объекте, создаем новый массив
+        if (!contactsByLetter[firstLetter]) {
+          contactsByLetter[firstLetter] = [];
+        }
 
-    // Добавление контакта в соответствующий массив
-    contactsByLetter[firstLetter].push(newContact);
+        // Добавление контакта в соответствующий массив
+        contactsByLetter[firstLetter].push(newContact);
 
-    // Сохранение обновленного списка LocalStorage
-    localStorage.setItem("contacts", JSON.stringify(contactsByLetter));
+        // Сохранение обновленного списка LocalStorage
+        localStorage.setItem("contacts", JSON.stringify(contactsByLetter));
 
-    console.log(
-        "Сохраненные данные в localStorage:",
-        localStorage.getItem("contacts")
-    ); // Отладка
+        console.log(
+            "Сохраненные данные в localStorage:",
+            localStorage.getItem("contacts")
+        ); // Отладка
 
-    // Очистка полей ввода
-    nameInput.value = "";
-    surnameInput.value = "";
-    vacancyInput.value = "";
-    phoneInput.value = "";
+        // Очистка полей ввода
+        nameInput.value = "";
+        surnameInput.value = "";
+        vacancyInput.value = "";
+        phoneInput.value = "";
 
-    // Отображение контактов в таблице
-    displayContacts();
-  }
+        // Отображение контактов в таблице
+        displayContacts();
+      }
 
-  // Функция для отображения ошибок
-  function showError(message: string): void {
-    const errorHolderL: HTMLElement | null = document.querySelector(".error.js-error");
-    if (errorHolderL) {
-      errorHolderL.textContent = message;
-      errorHolderL.style.display = "block";
+      // Функция для отображения ошибок
+      function showError(message: string): void {
+        const errorHolderL: HTMLElement | null = document.querySelector(".error.js-error");
+        if (errorHolderL) {
+          errorHolderL.textContent = message;
+          errorHolderL.style.display = "block";
       setTimeout(() => {
         errorHolderL.style.display = "none";
       }, 5000);
@@ -302,9 +302,13 @@ window.onload = function (): void {
 
   // Модальные окна
   const modals = () => {
+    const modalOverlay = document.querySelector(".js-modal-overlay") as HTMLElement | null;
+
     function closeModal(modal: HTMLElement): void {
       modal.style.display = "none";
-      modalOverlay.style.display = "none";
+      if (modalOverlay) {
+        modalOverlay.style.display = "none";
+      }
       document.body.style.overflow = "";
       modal.setAttribute("aria-hidden", "true");
     }
@@ -313,7 +317,9 @@ window.onload = function (): void {
       trigger.addEventListener("click", (e: MouseEvent) => {
         e.preventDefault();
         modal.style.display = "block";
-        modalOverlay.style.display = "block";
+        if (modalOverlay) {
+          modalOverlay.style.display = "block";
+        }
         document.body.style.overflow = "hidden";
         modal.setAttribute("aria-hidden", "false");
       });
@@ -321,22 +327,33 @@ window.onload = function (): void {
       close.addEventListener("click", () => {
         closeModal(modal);
       });
+      if (modalOverlay) {
+        modalOverlay.addEventListener("click", (e: MouseEvent) => {
+          if (e.target === modalOverlay) {
+            closeModal(modal);
+          }
+        });
+      }
 
       const overlay = modal.previousElementSibling as HTMLElement; // Получаем оверлей перед модальным окном
-      overlay.addEventListener("click", (e: MouseEvent) => {
-        if (e.target === overlay) {
-          closeModal(modal);
-        }
-      });
+      if (overlay) {
+       overlay.addEventListener("click", (e: MouseEvent) => {
+         if (e.target === overlay) {
+           closeModal(modal);
+         }
+       })
+      }
     }
 
     const callModalBtn = document.querySelector(".js-search-btn") as HTMLElement | null;
-    const modalWindow = document.querySelector(".search-popup") as HTMLElement;
-    const closeBtn = document.querySelector(".js-popup-close") as HTMLElement;
-    const modalOverlay = document.querySelector(".modalOverlay") as HTMLElement;
+    const modalWindow = document.querySelector(".search-popup") as HTMLElement | null;
+    const closeBtn = document.querySelector(".js-popup-close") as HTMLElement | null;
 
     if (callModalBtn && modalWindow && closeBtn && modalOverlay) {
       bindModal(callModalBtn, modalWindow, closeBtn);
+    } else {
+      console.error("Не удалось найти необходимые элементы для модального окна.");
+    }
 
       // Добавляем обработчик для поля ввода
       const searchInput = document.querySelector('.js-search-input') as HTMLInputElement | null;
@@ -354,9 +371,7 @@ window.onload = function (): void {
           showAllContacts(document.querySelector('.js-popup-output') as HTMLElement);
         });
       }
-    } else {
-      console.error("Не удалось найти необходимые элементы для модального окна.");
-    }
+
   };
 
   // Функция для удаления контакта
@@ -677,7 +692,6 @@ window.onload = function (): void {
       }
     }
 
-// Загрузка контактов из localStorage при загрузке страницы
-    loadContacts();
   }
+  loadContacts();
 }

@@ -246,7 +246,7 @@ window.onload = function () {
     }
     // Модальные окна
     const modals = () => {
-        const modalOverlay = document.querySelector(".js-modal-overlay");
+        const modalOverlay = document.querySelector(".modalOverlay");
         function closeModal(modal) {
             modal.style.display = "none";
             if (modalOverlay) {
@@ -268,14 +268,7 @@ window.onload = function () {
             close.addEventListener("click", () => {
                 closeModal(modal);
             });
-            if (modalOverlay) {
-                modalOverlay.addEventListener("click", (e) => {
-                    if (e.target === modalOverlay) {
-                        closeModal(modal);
-                    }
-                });
-            }
-            const overlay = modal.previousElementSibling; // Получаем оверлей перед модальным окном
+            const overlay = modal.previousElementSibling;
             if (overlay) {
                 overlay.addEventListener("click", (e) => {
                     if (e.target === overlay) {
@@ -293,7 +286,7 @@ window.onload = function () {
         else {
             console.error("Не удалось найти необходимые элементы для модального окна.");
         }
-        // Добавляем обработчик для поля ввода
+        // Добавляем обработчик для поля ввода поиска
         const searchInput = document.querySelector('.js-search-input');
         if (searchInput) {
             searchInput.addEventListener('input', function () {
@@ -308,44 +301,43 @@ window.onload = function () {
                 showAllContacts(document.querySelector('.js-popup-output'));
             });
         }
-    };
-    // Функция для удаления контакта
-    function deleteContact(contactId) {
-        let found = false; // Флаг для проверки, был ли найден контакт
-        for (let letter in contactsByLetter) {
-            const initialLength = contactsByLetter[letter].length; // Сохраняем длину массива перед удалением
-            contactsByLetter[letter] = contactsByLetter[letter].filter((contact) => {
-                return contact.Id !== contactId;
-            });
-            // Если длина массива изменилась, значит контакт был найден и удален
-            if (contactsByLetter[letter].length < initialLength) {
-                found = true;
+        // Функция для удаления контакта
+        function deleteContact(contactId) {
+            let found = false; // Флаг для проверки, был ли найден контакт
+            for (let letter in contactsByLetter) {
+                const initialLength = contactsByLetter[letter].length; // Сохраняем длину массива перед удалением
+                contactsByLetter[letter] = contactsByLetter[letter].filter((contact) => {
+                    return contact.Id !== contactId;
+                });
+                // Если длина массива изменилась, значит контакт был найден и удален
+                if (contactsByLetter[letter].length < initialLength) {
+                    found = true;
+                }
+            }
+            if (found) {
+                // Сохраняем обновленный список в localStorage
+                localStorage.setItem('contacts', JSON.stringify(contactsByLetter));
+                console.log("Контакт успешно удален.");
+                displayContacts();
+                const output = document.querySelector('.js-popup-output');
+                if (output) {
+                    showAllContacts(output);
+                }
+                else {
+                    console.error('Контакт не найден для удаления:', contactId);
+                }
             }
         }
-        if (found) {
-            // Сохраняем обновленный список в localStorage
-            localStorage.setItem('contacts', JSON.stringify(contactsByLetter));
-            console.log("Контакт успешно удален.");
-            displayContacts();
-            const output = document.querySelector('.js-popup-output');
-            if (output) {
-                showAllContacts(output);
-            }
-            else {
-                console.error('Контакт не найден для удаления:', contactId);
-            }
-        }
-    }
-    // Функция для отображения всех контактов в модальном окне
-    function showAllContacts(output) {
-        output.innerHTML = ''; // Очищаем текущее содержимое
-        let hasContacts = false; // Флаг для проверки наличия контактов
-        Object.keys(contactsByLetter).forEach(letter => {
-            contactsByLetter[letter].forEach((contact) => {
-                hasContacts = true;
-                const contactItemElement = document.createElement('div');
-                contactItemElement.classList.add('contact-item');
-                contactItemElement.innerHTML = `
+        // Функция для отображения всех контактов в модальном окне
+        function showAllContacts(output) {
+            output.innerHTML = ''; // Очищаем текущее содержимое
+            let hasContacts = false; // Флаг для проверки наличия контактов
+            Object.keys(contactsByLetter).forEach(letter => {
+                contactsByLetter[letter].forEach((contact) => {
+                    hasContacts = true;
+                    const contactItemElement = document.createElement('div');
+                    contactItemElement.classList.add('contact-item');
+                    contactItemElement.innerHTML = `
                 <strong>Фамилия:</strong> ${contact.surname} <br>
                 <strong>Имя:</strong> ${contact.name} <br>
                 <strong>Должность:</strong> ${contact.vacancy} <br>
@@ -353,104 +345,104 @@ window.onload = function () {
                 <i class="fas fa-edit edit-btn" data-id="${contact.Id}" title="Редактировать"></i>
                 <i class="fas fa-trash delete-btn" data-id="${contact.Id}" title="Удалить"></i>              
             `;
-                output.appendChild(contactItemElement);
+                    output.appendChild(contactItemElement);
+                });
             });
-        });
-        // Управляем видимостью контейнера
-        output.style.display = hasContacts ? 'block' : 'none';
-        // Добавляем обработчики событий на кнопки редактирования
-        addEditButtonHandlers(output);
-        addDeleteButtonHandlers(output);
-    }
-    // Функция для добавления обработчиков событий на кнопки удаления
-    function addDeleteButtonHandlers(output) {
-        const deleteButtons = output.querySelectorAll('.delete-btn');
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', (event) => {
-                const target = event.currentTarget;
-                const contactId = target.dataset.id || '';
-                console.log("Кнопка удаления нажата для ID:", contactId);
-                deleteContact(contactId); // Вызов функции удаления контакта
+            // Управляем видимостью контейнера
+            output.style.display = hasContacts ? 'block' : 'none';
+            // Добавляем обработчики событий на кнопки редактирования
+            addEditButtonHandlers(output);
+            addDeleteButtonHandlers(output);
+        }
+        // Функция для добавления обработчиков событий на кнопки удаления
+        function addDeleteButtonHandlers(output) {
+            const deleteButtons = output.querySelectorAll('.delete-btn');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const target = event.currentTarget;
+                    const contactId = target.dataset.id || '';
+                    console.log("Кнопка удаления нажата для ID:", contactId);
+                    deleteContact(contactId); // Вызов функции удаления контакта
+                });
             });
-        });
-    }
-    // Функция для заполнения полей редактирования
-    function populateEditFields(contact) {
-        document.querySelector('.js-edit-name-input').value = contact.name;
-        document.querySelector('.js-edit-surname-input').value = contact.surname;
-        document.querySelector('.js-edit-vacancy-input').value = contact.vacancy;
-        document.querySelector('.js-edit-phone-input').value = contact.phone;
-    }
-    // Функция для добавления обработчиков событий на кнопки редактирования
-    function addEditButtonHandlers(output) {
-        const editButtons = output.querySelectorAll('.edit-btn');
-        editButtons.forEach(button => {
-            button.addEventListener('click', (event) => {
-                const target = event.currentTarget;
-                const contactId = target.dataset.id || '';
-                // Находим контакт по уникальному идентификатору
-                const contactToEdit = findContactById(contactId);
+        }
+        // Функция для заполнения полей редактирования
+        function populateEditFields(contact) {
+            document.querySelector('.js-edit-name-input').value = contact.name;
+            document.querySelector('.js-edit-surname-input').value = contact.surname;
+            document.querySelector('.js-edit-vacancy-input').value = contact.vacancy;
+            document.querySelector('.js-edit-phone-input').value = contact.phone;
+        }
+        // Функция для добавления обработчиков событий на кнопки редактирования
+        function addEditButtonHandlers(output) {
+            const editButtons = output.querySelectorAll('.edit-btn');
+            editButtons.forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const target = event.currentTarget;
+                    const contactId = target.dataset.id || '';
+                    // Находим контакт по уникальному идентификатору
+                    const contactToEdit = findContactById(contactId);
+                    if (contactToEdit) {
+                        // Заполняем поля редактирования
+                        populateEditFields(contactToEdit);
+                        // Открываем модальное окно редактирования
+                        openEditPopup(contactToEdit.Id);
+                    }
+                    else {
+                        console.error('Контакт не найден для редактирования:', contactId);
+                    }
+                });
+            });
+        }
+        // Функция открытия модального окна редактирования
+        function openEditPopup(id) {
+            const editPopup = document.getElementById("editPopup");
+            const overlay = document.getElementById("editPopupOverlay");
+            if (editPopup && overlay) {
+                // Сохраняем информацию о том, какой контакт редактируется
+                editPopup.dataset.id = id;
+                // Заполняем поля ввода данными контакта
+                const contactToEdit = findContactById(id);
                 if (contactToEdit) {
-                    // Заполняем поля редактирования
-                    populateEditFields(contactToEdit);
-                    // Открываем модальное окно редактирования
-                    openEditPopup(contactToEdit.Id);
+                    document.querySelector('.js-edit-name-input').value = contactToEdit.name;
+                    document.querySelector('.js-edit-surname-input').value = contactToEdit.surname;
+                    document.querySelector('.js-edit-vacancy-input').value = contactToEdit.vacancy;
+                    document.querySelector('.js-edit-phone-input').value = contactToEdit.phone;
+                    // Очищаем поле вывода ошибок
+                    const editErrorHolder = document.querySelector('.js-edit-error');
+                    if (editErrorHolder) {
+                        editErrorHolder.textContent = '';
+                    }
+                    editPopup.style.display = "block";
+                    overlay.style.display = "block";
                 }
                 else {
-                    console.error('Контакт не найден для редактирования:', contactId);
+                    console.error("Контакт не найден для редактирования:", id);
                 }
-            });
-        });
-    }
-    // Функция открытия модального окна редактирования
-    function openEditPopup(id) {
-        const editPopup = document.getElementById("editPopup");
-        const overlay = document.getElementById("editPopupOverlay");
-        if (editPopup && overlay) {
-            // Сохраняем информацию о том, какой контакт редактируется
-            editPopup.dataset.id = id;
-            // Заполняем поля ввода данными контакта
-            const contactToEdit = findContactById(id);
-            if (contactToEdit) {
-                document.querySelector('.js-edit-name-input').value = contactToEdit.name;
-                document.querySelector('.js-edit-surname-input').value = contactToEdit.surname;
-                document.querySelector('.js-edit-vacancy-input').value = contactToEdit.vacancy;
-                document.querySelector('.js-edit-phone-input').value = contactToEdit.phone;
-                // Очищаем поле вывода ошибок
-                const editErrorHolder = document.querySelector('.js-edit-error');
-                if (editErrorHolder) {
-                    editErrorHolder.textContent = '';
-                }
-                editPopup.style.display = "block";
-                overlay.style.display = "block";
-            }
-            else {
-                console.error("Контакт не найден для редактирования:", id);
             }
         }
-    }
-    // Функция для фильтрации контактов
-    function filterContacts(searchTerm) {
-        const output = document.querySelector('.js-popup-output');
-        if (!output) {
-            console.error('Контейнер для вывода контактов не найден.');
-            return;
-        }
-        output.innerHTML = ''; // Очищаем текущее содержимое
-        if (searchTerm.trim() === '') {
-            output.style.display = 'none'; // Скрываем при пустом запросе
-            return; // Если поисковый запрос пуст, ничего не выводим
-        }
-        let hasContacts = false; // Флаг для проверки наличия контактов
-        Object.keys(contactsByLetter).forEach(letter => {
-            contactsByLetter[letter].forEach((contact) => {
-                if (contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    contact.surname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    contact.vacancy.toLowerCase().includes(searchTerm.toLowerCase())) {
-                    hasContacts = true; // Устанавливаем флаг, если есть хотя бы один контакт
-                    const contactItemElement = document.createElement('div');
-                    contactItemElement.classList.add('contact-item');
-                    contactItemElement.innerHTML = `
+        // Функция для фильтрации контактов
+        function filterContacts(searchTerm) {
+            const output = document.querySelector('.js-popup-output');
+            if (!output) {
+                console.error('Контейнер для вывода контактов не найден.');
+                return;
+            }
+            output.innerHTML = ''; // Очищаем текущее содержимое
+            if (searchTerm.trim() === '') {
+                output.style.display = 'none'; // Скрываем при пустом запросе
+                return; // Если поисковый запрос пуст, ничего не выводим
+            }
+            let hasContacts = false; // Флаг для проверки наличия контактов
+            Object.keys(contactsByLetter).forEach(letter => {
+                contactsByLetter[letter].forEach((contact) => {
+                    if (contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        contact.surname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        contact.vacancy.toLowerCase().includes(searchTerm.toLowerCase())) {
+                        hasContacts = true; // Устанавливаем флаг, если есть хотя бы один контакт
+                        const contactItemElement = document.createElement('div');
+                        contactItemElement.classList.add('contact-item');
+                        contactItemElement.innerHTML = `
                   <strong>Фамилия:</strong> ${contact.surname} <br>
                   <strong>Имя:</strong> ${contact.name} <br>
                   <strong>Должность:</strong> ${contact.vacancy} <br>
@@ -459,116 +451,120 @@ window.onload = function () {
                   <i class="fas fa-trash delete-btn" data-id="${contact.Id}" title="Удалить"></i>
                   <hr>
               `;
-                    output.appendChild(contactItemElement);
-                }
-            });
-        });
-        // Управляем видимостью контейнера
-        output.style.display = hasContacts ? 'block' : 'none';
-        // Добавляем обработчики событий на кнопки редактирования после фильтрации
-        addEditButtonHandlers(output);
-        addDeleteButtonHandlers(output);
-        // Вызов функции модальных окон
-        modals();
-        // Функция закрытия модального окна редактирования
-        function closeEditPopup() {
-            const editPopup = document.getElementById("editPopup");
-            const overlay = document.getElementById("editPopupOverlay");
-            if (editPopup && overlay) {
-                editPopup.style.display = "none";
-                overlay.style.display = "none";
-            }
-        }
-        // Обработчик события для закрытия модального окна без изменений
-        const closeEditButton = document.querySelector(".js-edit-popup-close");
-        if (closeEditButton) {
-            closeEditButton.addEventListener("click", () => {
-                closeEditPopup();
-            });
-        }
-        // Обработчик события для редактирования контакта
-        const submitEditButton = document.querySelector('.js-submit-edit-btn');
-        if (submitEditButton) {
-            submitEditButton.addEventListener('click', function () {
-                const editPopup = document.getElementById('editPopup');
-                const contactId = (editPopup === null || editPopup === void 0 ? void 0 : editPopup.dataset.id) || '';
-                // Получаем данные из полей ввода редактирования
-                const nameInputValue = document.querySelector('.js-edit-name-input').value.trim();
-                const surnameInputValue = document.querySelector('.js-edit-surname-input').value.trim();
-                const vacancyInputValue = document.querySelector('.js-edit-vacancy-input').value.trim();
-                const phoneInputValue = document.querySelector('.js-edit-phone-input').value.trim();
-                // Валидация данных перед обновлением
-                if (!isValidName(surnameInputValue)) {
-                    showEditError("Фамилия должна содержать только буквы и быть не менее двух символов.");
-                    return;
-                }
-                if (!isValidName(nameInputValue)) {
-                    showEditError("Имя должно содержать только буквы и быть не менее двух символов.");
-                    return;
-                }
-                // Форматируем номер телефона перед проверкой валидности
-                let formattedPhone;
-                try {
-                    formattedPhone = formatPhoneNumber(phoneInputValue);
-                    console.log(`Отформатированный номер: ${formattedPhone}`);
-                }
-                catch (error) {
-                    showEditError(error.message);
-                    return;
-                }
-                // Проверяем валидность отформатированного номера
-                if (!isValidPhone(formattedPhone, 'RU')) { // Предполагаем проверку для России
-                    showEditError(`Номер телефона должен соответствовать формату: ${phonePatterns['RU'].example}`);
-                    return;
-                }
-                let contactToEdit = findContactById(contactId);
-                if (!contactToEdit) {
-                    console.error("Контакт не найден для редактирования:", contactId);
-                    return;
-                }
-                // Удаляем контакт из старого раздела
-                const oldLetter = contactToEdit.Id[0]; // Используем первую букву ID для определения старого раздела
-                contactsByLetter[oldLetter] = contactsByLetter[oldLetter].filter((contact) => contact.Id !== contactId);
-                // Обновляем данные контакта
-                contactToEdit.name = nameInputValue;
-                contactToEdit.surname = surnameInputValue;
-                contactToEdit.vacancy = vacancyInputValue;
-                contactToEdit.phone = formattedPhone; // Используем отформатированный номер телефона
-                // Определяем новую букву для фамилии
-                const newLetter = surnameInputValue[0].toLowerCase();
-                // Если новый раздел отличается от старого, добавляем контакт в новый раздел
-                if (newLetter !== oldLetter) {
-                    if (!contactsByLetter[newLetter]) {
-                        contactsByLetter[newLetter] = []; // Создаем новый раздел, если его нет
+                        output.appendChild(contactItemElement);
                     }
-                    contactsByLetter[newLetter].push(contactToEdit);
-                }
-                else {
-                    // Если буква не изменилась, просто обновляем существующий массив
-                    contactsByLetter[oldLetter].push(contactToEdit);
-                }
-                // Сохраняем обновленный список в localStorage
-                localStorage.setItem("contacts", JSON.stringify(contactsByLetter));
-                // Закрываем окно редактирования и обновляем список в поисковом окне
-                closeEditPopup();
-                // Обновляем отображение контактов без перезагрузки страницы
-                const output = document.querySelector(".js-popup-output");
-                if (output) {
-                    output.innerHTML = ""; // Очищаем текущий вывод
-                    showAllContacts(output); // Отображаем обновленные контакты
-                }
+                });
             });
-        }
-        // Функция для отображения ошибок в модальном окне редактирования
-        function showEditError(message) {
-            const editErrorHolder = document.querySelector('.js-edit-error');
-            if (editErrorHolder) {
-                editErrorHolder.textContent = message; // Отображаем сообщение об ошибке в модальном окне
-                setTimeout(() => {
-                    editErrorHolder.textContent = ''; // Очищаем сообщение через 5 секунд
-                }, 5000);
+            // Управляем видимостью контейнера
+            output.style.display = hasContacts ? 'block' : 'none';
+            // Добавляем обработчики событий на кнопки редактирования после фильтрации
+            addEditButtonHandlers(output);
+            addDeleteButtonHandlers(output);
+            // Вызов функции модальных окон
+            document.addEventListener("DOMContentLoaded", () => {
+                modals();
+            });
+            // Функция закрытия модального окна редактирования
+            function closeEditPopup() {
+                const editPopup = document.getElementById("editPopup");
+                const overlay = document.getElementById("editPopupOverlay");
+                if (editPopup && overlay) {
+                    editPopup.style.display = "none";
+                    overlay.style.display = "none";
+                }
+            }
+            // Обработчик события для закрытия модального окна без изменений
+            const closeEditButton = document.querySelector(".js-edit-popup-close");
+            if (closeEditButton) {
+                closeEditButton.addEventListener("click", () => {
+                    closeEditPopup();
+                });
+            }
+            // Обработчик события для редактирования контакта
+            const submitEditButton = document.querySelector('.js-submit-edit-btn');
+            if (submitEditButton) {
+                submitEditButton.addEventListener('click', function () {
+                    const editPopup = document.getElementById('editPopup');
+                    const contactId = (editPopup === null || editPopup === void 0 ? void 0 : editPopup.dataset.id) || '';
+                    // Получаем данные из полей ввода редактирования
+                    const nameInputValue = document.querySelector('.js-edit-name-input').value.trim();
+                    const surnameInputValue = document.querySelector('.js-edit-surname-input').value.trim();
+                    const vacancyInputValue = document.querySelector('.js-edit-vacancy-input').value.trim();
+                    const phoneInputValue = document.querySelector('.js-edit-phone-input').value.trim();
+                    // Валидация данных перед обновлением
+                    if (!isValidName(surnameInputValue)) {
+                        showEditError("Фамилия должна содержать только буквы и быть не менее двух символов.");
+                        return;
+                    }
+                    if (!isValidName(nameInputValue)) {
+                        showEditError("Имя должно содержать только буквы и быть не менее двух символов.");
+                        return;
+                    }
+                    // Форматируем номер телефона перед проверкой валидности
+                    let formattedPhone;
+                    try {
+                        formattedPhone = formatPhoneNumber(phoneInputValue);
+                        console.log(`Отформатированный номер: ${formattedPhone}`);
+                    }
+                    catch (error) {
+                        showEditError(error.message);
+                        return;
+                    }
+                    // Проверяем валидность отформатированного номера
+                    if (!isValidPhone(formattedPhone, 'RU')) { // Предполагаем проверку для России
+                        showEditError(`Номер телефона должен соответствовать формату: ${phonePatterns['RU'].example}`);
+                        return;
+                    }
+                    let contactToEdit = findContactById(contactId);
+                    if (!contactToEdit) {
+                        console.error("Контакт не найден для редактирования:", contactId);
+                        return;
+                    }
+                    // Удаляем контакт из старого раздела
+                    const oldLetter = contactToEdit.Id[0]; // Используем первую букву ID для определения старого раздела
+                    contactsByLetter[oldLetter] = contactsByLetter[oldLetter].filter((contact) => contact.Id !== contactId);
+                    // Обновляем данные контакта
+                    contactToEdit.name = nameInputValue;
+                    contactToEdit.surname = surnameInputValue;
+                    contactToEdit.vacancy = vacancyInputValue;
+                    contactToEdit.phone = formattedPhone; // Используем отформатированный номер телефона
+                    // Определяем новую букву для фамилии
+                    const newLetter = surnameInputValue[0].toLowerCase();
+                    // Если новый раздел отличается от старого, добавляем контакт в новый раздел
+                    if (newLetter !== oldLetter) {
+                        if (!contactsByLetter[newLetter]) {
+                            contactsByLetter[newLetter] = []; // Создаем новый раздел, если его нет
+                        }
+                        contactsByLetter[newLetter].push(contactToEdit);
+                    }
+                    else {
+                        // Если буква не изменилась, просто обновляем существующий массив
+                        contactsByLetter[oldLetter].push(contactToEdit);
+                    }
+                    // Сохраняем обновленный список в localStorage
+                    localStorage.setItem("contacts", JSON.stringify(contactsByLetter));
+                    // Закрываем окно редактирования и обновляем список в поисковом окне
+                    closeEditPopup();
+                    // Обновляем отображение контактов без перезагрузки страницы
+                    const output = document.querySelector(".js-popup-output");
+                    if (output) {
+                        output.innerHTML = ""; // Очищаем текущий вывод
+                        showAllContacts(output); // Отображаем обновленные контакты
+                    }
+                });
+            }
+            // Функция для отображения ошибок в модальном окне редактирования
+            function showEditError(message) {
+                const editErrorHolder = document.querySelector('.js-edit-error');
+                if (editErrorHolder) {
+                    editErrorHolder.textContent = message; // Отображаем сообщение об ошибке в модальном окне
+                    setTimeout(() => {
+                        editErrorHolder.textContent = ''; // Очищаем сообщение через 5 секунд
+                    }, 5000);
+                }
             }
         }
-    }
+    };
     loadContacts();
+    modals();
 };

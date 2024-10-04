@@ -460,111 +460,107 @@ window.onload = function () {
             // Добавляем обработчики событий на кнопки редактирования после фильтрации
             addEditButtonHandlers(output);
             addDeleteButtonHandlers(output);
-            // Вызов функции модальных окон
-            document.addEventListener("DOMContentLoaded", () => {
-                modals();
+        }
+        // Функция закрытия модального окна редактирования
+        function closeEditPopup() {
+            const editPopup = document.getElementById("editPopup");
+            const overlay = document.getElementById("editPopupOverlay");
+            if (editPopup && overlay) {
+                editPopup.style.display = "none";
+                overlay.style.display = "none";
+            }
+        }
+        // Обработчик события для закрытия модального окна без изменений
+        const closeEditButton = document.querySelector(".js-edit-popup-close");
+        if (closeEditButton) {
+            closeEditButton.addEventListener("click", () => {
+                closeEditPopup();
             });
-            // Функция закрытия модального окна редактирования
-            function closeEditPopup() {
-                const editPopup = document.getElementById("editPopup");
-                const overlay = document.getElementById("editPopupOverlay");
-                if (editPopup && overlay) {
-                    editPopup.style.display = "none";
-                    overlay.style.display = "none";
+        }
+        // Обработчик события для редактирования контакта
+        const submitEditButton = document.querySelector('.js-submit-edit-btn');
+        if (submitEditButton) {
+            submitEditButton.addEventListener('click', function () {
+                const editPopup = document.getElementById('editPopup');
+                const contactId = (editPopup === null || editPopup === void 0 ? void 0 : editPopup.dataset.id) || '';
+                // Получаем данные из полей ввода редактирования
+                const nameInputValue = document.querySelector('.js-edit-name-input').value.trim();
+                const surnameInputValue = document.querySelector('.js-edit-surname-input').value.trim();
+                const vacancyInputValue = document.querySelector('.js-edit-vacancy-input').value.trim();
+                const phoneInputValue = document.querySelector('.js-edit-phone-input').value.trim();
+                // Валидация данных перед обновлением
+                if (!isValidName(surnameInputValue)) {
+                    showEditError("Фамилия должна содержать только буквы и быть не менее двух символов.");
+                    return;
                 }
-            }
-            // Обработчик события для закрытия модального окна без изменений
-            const closeEditButton = document.querySelector(".js-edit-popup-close");
-            if (closeEditButton) {
-                closeEditButton.addEventListener("click", () => {
-                    closeEditPopup();
-                });
-            }
-            // Обработчик события для редактирования контакта
-            const submitEditButton = document.querySelector('.js-submit-edit-btn');
-            if (submitEditButton) {
-                submitEditButton.addEventListener('click', function () {
-                    const editPopup = document.getElementById('editPopup');
-                    const contactId = (editPopup === null || editPopup === void 0 ? void 0 : editPopup.dataset.id) || '';
-                    // Получаем данные из полей ввода редактирования
-                    const nameInputValue = document.querySelector('.js-edit-name-input').value.trim();
-                    const surnameInputValue = document.querySelector('.js-edit-surname-input').value.trim();
-                    const vacancyInputValue = document.querySelector('.js-edit-vacancy-input').value.trim();
-                    const phoneInputValue = document.querySelector('.js-edit-phone-input').value.trim();
-                    // Валидация данных перед обновлением
-                    if (!isValidName(surnameInputValue)) {
-                        showEditError("Фамилия должна содержать только буквы и быть не менее двух символов.");
-                        return;
-                    }
-                    if (!isValidName(nameInputValue)) {
-                        showEditError("Имя должно содержать только буквы и быть не менее двух символов.");
-                        return;
-                    }
-                    // Форматируем номер телефона перед проверкой валидности
-                    let formattedPhone;
-                    try {
-                        formattedPhone = formatPhoneNumber(phoneInputValue);
-                        console.log(`Отформатированный номер: ${formattedPhone}`);
-                    }
-                    catch (error) {
-                        showEditError(error.message);
-                        return;
-                    }
-                    // Проверяем валидность отформатированного номера
-                    if (!isValidPhone(formattedPhone, 'RU')) { // Предполагаем проверку для России
-                        showEditError(`Номер телефона должен соответствовать формату: ${phonePatterns['RU'].example}`);
-                        return;
-                    }
-                    let contactToEdit = findContactById(contactId);
-                    if (!contactToEdit) {
-                        console.error("Контакт не найден для редактирования:", contactId);
-                        return;
-                    }
-                    // Удаляем контакт из старого раздела
-                    const oldLetter = contactToEdit.Id[0]; // Используем первую букву ID для определения старого раздела
-                    contactsByLetter[oldLetter] = contactsByLetter[oldLetter].filter((contact) => contact.Id !== contactId);
-                    // Обновляем данные контакта
-                    contactToEdit.name = nameInputValue;
-                    contactToEdit.surname = surnameInputValue;
-                    contactToEdit.vacancy = vacancyInputValue;
-                    contactToEdit.phone = formattedPhone; // Используем отформатированный номер телефона
-                    // Определяем новую букву для фамилии
-                    const newLetter = surnameInputValue[0].toLowerCase();
-                    // Если новый раздел отличается от старого, добавляем контакт в новый раздел
-                    if (newLetter !== oldLetter) {
-                        if (!contactsByLetter[newLetter]) {
-                            contactsByLetter[newLetter] = []; // Создаем новый раздел, если его нет
-                        }
-                        contactsByLetter[newLetter].push(contactToEdit);
-                    }
-                    else {
-                        // Если буква не изменилась, просто обновляем существующий массив
-                        contactsByLetter[oldLetter].push(contactToEdit);
-                    }
-                    // Сохраняем обновленный список в localStorage
-                    localStorage.setItem("contacts", JSON.stringify(contactsByLetter));
-                    // Закрываем окно редактирования и обновляем список в поисковом окне
-                    closeEditPopup();
-                    // Обновляем отображение контактов без перезагрузки страницы
-                    const output = document.querySelector(".js-popup-output");
-                    if (output) {
-                        output.innerHTML = ""; // Очищаем текущий вывод
-                        showAllContacts(output); // Отображаем обновленные контакты
-                    }
-                });
-            }
-            // Функция для отображения ошибок в модальном окне редактирования
-            function showEditError(message) {
-                const editErrorHolder = document.querySelector('.js-edit-error');
-                if (editErrorHolder) {
-                    editErrorHolder.textContent = message; // Отображаем сообщение об ошибке в модальном окне
-                    setTimeout(() => {
-                        editErrorHolder.textContent = ''; // Очищаем сообщение через 5 секунд
-                    }, 5000);
+                if (!isValidName(nameInputValue)) {
+                    showEditError("Имя должно содержать только буквы и быть не менее двух символов.");
+                    return;
                 }
+                // Форматируем номер телефона перед проверкой валидности
+                let formattedPhone;
+                try {
+                    formattedPhone = formatPhoneNumber(phoneInputValue);
+                    console.log(`Отформатированный номер: ${formattedPhone}`);
+                }
+                catch (error) {
+                    showEditError(error.message);
+                    return;
+                }
+                // Проверяем валидность отформатированного номера
+                if (!isValidPhone(formattedPhone, 'RU')) { // Предполагаем проверку для России
+                    showEditError(`Номер телефона должен соответствовать формату: ${phonePatterns['RU'].example}`);
+                    return;
+                }
+                let contactToEdit = findContactById(contactId);
+                if (!contactToEdit) {
+                    console.error("Контакт не найден для редактирования:", contactId);
+                    return;
+                }
+                // Удаляем контакт из старого раздела
+                const oldLetter = contactToEdit.Id[0]; // Используем первую букву ID для определения старого раздела
+                contactsByLetter[oldLetter] = contactsByLetter[oldLetter].filter((contact) => contact.Id !== contactId);
+                // Обновляем данные контакта
+                contactToEdit.name = nameInputValue;
+                contactToEdit.surname = surnameInputValue;
+                contactToEdit.vacancy = vacancyInputValue;
+                contactToEdit.phone = formattedPhone; // Используем отформатированный номер телефона
+                // Определяем новую букву для фамилии
+                const newLetter = surnameInputValue[0].toLowerCase();
+                // Если новый раздел отличается от старого, добавляем контакт в новый раздел
+                if (newLetter !== oldLetter) {
+                    if (!contactsByLetter[newLetter]) {
+                        contactsByLetter[newLetter] = []; // Создаем новый раздел, если его нет
+                    }
+                    contactsByLetter[newLetter].push(contactToEdit);
+                }
+                else {
+                    // Если буква не изменилась, просто обновляем существующий массив
+                    contactsByLetter[oldLetter].push(contactToEdit);
+                }
+                // Сохраняем обновленный список в localStorage
+                localStorage.setItem("contacts", JSON.stringify(contactsByLetter));
+                // Закрываем окно редактирования и обновляем список в поисковом окне
+                closeEditPopup();
+                // Обновляем отображение контактов без перезагрузки страницы
+                const output = document.querySelector(".js-popup-output");
+                if (output) {
+                    output.innerHTML = ""; // Очищаем текущий вывод
+                    showAllContacts(output); // Отображаем обновленные контакты
+                }
+            });
+        }
+        // Функция для отображения ошибок в модальном окне редактирования
+        function showEditError(message) {
+            const editErrorHolder = document.querySelector('.js-edit-error');
+            if (editErrorHolder) {
+                editErrorHolder.textContent = message; // Отображаем сообщение об ошибке в модальном окне
+                setTimeout(() => {
+                    editErrorHolder.textContent = ''; // Очищаем сообщение через 5 секунд
+                }, 5000);
             }
         }
     };
-    loadContacts();
     modals();
+    loadContacts();
 };

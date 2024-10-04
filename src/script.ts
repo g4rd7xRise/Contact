@@ -426,15 +426,14 @@ window.onload = function (): void {
           output.appendChild(contactItemElement);
         });
       });
-
-      // Управляем видимостью контейнера
+// Управляем видимостью контейнера
       output.style.display = hasContacts ? 'block' : 'none';
 
       // Добавляем обработчики событий на кнопки редактирования
       addEditButtonHandlers(output);
       addDeleteButtonHandlers(output);
-
     }
+
 
 // Функция для добавления обработчиков событий на кнопки удаления
     function addDeleteButtonHandlers(output: HTMLElement): void {
@@ -565,11 +564,7 @@ window.onload = function (): void {
 // Добавляем обработчики событий на кнопки редактирования после фильтрации
       addEditButtonHandlers(output);
       addDeleteButtonHandlers(output);
-
-// Вызов функции модальных окон
-      document.addEventListener("DOMContentLoaded", () => {
-        modals();
-      })
+    }
 
 // Функция закрытия модального окна редактирования
       function closeEditPopup(): void {
@@ -595,13 +590,13 @@ window.onload = function (): void {
       if (submitEditButton) {
         submitEditButton.addEventListener('click', function () {
           const editPopup = document.getElementById('editPopup') as HTMLElement | null;
-          const contactId: any = editPopup?.dataset.id || '';
+          const contactId: string = editPopup?.dataset.id || '';
 
           // Получаем данные из полей ввода редактирования
-          const nameInputValue: any = (document.querySelector('.js-edit-name-input') as HTMLInputElement).value.trim();
-          const surnameInputValue: any = (document.querySelector('.js-edit-surname-input') as HTMLInputElement).value.trim();
-          const vacancyInputValue: any = (document.querySelector('.js-edit-vacancy-input') as HTMLInputElement).value.trim();
-          const phoneInputValue: any = (document.querySelector('.js-edit-phone-input') as HTMLInputElement).value.trim();
+          const nameInputValue: string = (document.querySelector('.js-edit-name-input') as HTMLInputElement).value.trim();
+          const surnameInputValue: string = (document.querySelector('.js-edit-surname-input') as HTMLInputElement).value.trim();
+          const vacancyInputValue: string = (document.querySelector('.js-edit-vacancy-input') as HTMLInputElement).value.trim();
+          const phoneInputValue: string = (document.querySelector('.js-edit-phone-input') as HTMLInputElement).value.trim();
 
           // Валидация данных перед обновлением
           if (!isValidName(surnameInputValue)) {
@@ -615,7 +610,7 @@ window.onload = function (): void {
           }
 
           // Форматируем номер телефона перед проверкой валидности
-          let formattedPhone: any;
+          let formattedPhone: string;
           try {
             formattedPhone = formatPhoneNumber(phoneInputValue);
             console.log(`Отформатированный номер: ${formattedPhone}`);
@@ -638,7 +633,7 @@ window.onload = function (): void {
           }
 
           // Удаляем контакт из старого раздела
-          const oldLetter: any = contactToEdit.Id[0]; // Используем первую букву ID для определения старого раздела
+          const oldLetter: string = contactToEdit.Id[0]; // Используем первую букву ID для определения старого раздела
           contactsByLetter[oldLetter] = contactsByLetter[oldLetter].filter((contact: Contact) => contact.Id !== contactId);
 
           // Обновляем данные контакта
@@ -648,7 +643,7 @@ window.onload = function (): void {
           contactToEdit.phone = formattedPhone; // Используем отформатированный номер телефона
 
           // Определяем новую букву для фамилии
-          const newLetter: any = surnameInputValue[0].toLowerCase();
+          const newLetter: string = surnameInputValue[0].toLowerCase();
 
           // Если новый раздел отличается от старого, добавляем контакт в новый раздел
           if (newLetter !== oldLetter) {
@@ -690,8 +685,9 @@ window.onload = function (): void {
         }
       }
 
-    }
+
   }
-  loadContacts();
   modals();
+  loadContacts();
+
 }
